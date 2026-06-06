@@ -1,13 +1,15 @@
 import { Router } from 'express'
 import jwt from 'jsonwebtoken'
 import multer from 'multer'
+import crypto from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
 import { buildIndex } from '../services/searchIndex.js'
 
 const router = Router()
 const DOCS_DIR = path.resolve('./docs')
-const JWT_SECRET = process.env.JWT_SECRET || 'doc-cms-secret'
+// JWT 签名密钥：优先使用环境变量，否则启动时生成（重启后旧 token 失效）
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex')
 
 // 文件上传配置：存到系统临时目录
 const upload = multer({ dest: '/tmp/uploads/' })
@@ -31,7 +33,10 @@ function authMiddleware(req, res, next) {
 // POST /api/admin/login — 管理员登录
 router.post('/admin/login', (req, res) => {
   const { password } = req.body
-  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123'
+  const adminPassword = process.env.ADMIN_PASSWORD
+  if (!adminPassword) {
+    return res.status(500).json({ error: 'ADMIN_PASSWORD environment variable not set' })
+  }
   if (password === adminPassword) {
     const token = jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: '24h' })
     return res.json({ token })

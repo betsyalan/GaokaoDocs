@@ -270,7 +270,7 @@ App.vue (整体布局)
 
 - 管理员登录：`POST /api/admin/login` + JWT Token
 - 管理操作需要 `Authorization: Bearer <token>` 头
-- 环境变量 `ADMIN_PASSWORD` 设置管理密码
+- 环境变量 `ADMIN_PASSWORD` 设置管理密码（必填，无默认值）
 - 前端管理页检测未登录时弹出密码输入框
 
 ---

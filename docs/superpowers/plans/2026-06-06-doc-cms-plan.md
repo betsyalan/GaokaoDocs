@@ -94,7 +94,7 @@ echo "📦 Building frontend..."
 cd frontend && npm run build
 
 echo "🚀 Starting server..."
-cd /root/web && ADMIN_PASSWORD=admin123 node server/index.js
+cd /root/web && ADMIN_PASSWORD=your_password node server/index.js
 ```
 
 - [ ] **Step 4: 创建 server/index.js 骨架**

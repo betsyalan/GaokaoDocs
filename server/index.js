@@ -43,6 +43,13 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'))
 })
 
+// 启动前检查：管理员密码必须通过环境变量设置
+if (!process.env.ADMIN_PASSWORD) {
+  console.error('❌ ADMIN_PASSWORD environment variable is required')
+  console.error('   export ADMIN_PASSWORD=your_password')
+  process.exit(1)
+}
+
 // 初始化搜索索引和统计
 initSearch()
 initStats().catch(() => {})
