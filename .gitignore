@@ -1,0 +1,34 @@
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+
+# 日志
+logs/
+*.log
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 环境变量和密钥
+.env
+.env.local
+.env.*.local
+
+# 运行时数据
+docs/search.db
+
+# Claude Code 本地配置
+.claude/
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 操作系统
+__pycache__/
+*.pyc
