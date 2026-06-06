@@ -54,7 +54,6 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { api } from '@/api'
-
 defineProps({
   open: { type: Boolean, default: false }
 })
@@ -94,6 +93,7 @@ async function loadFiles() {
 }
 
 onMounted(loadFiles)
+
 </script>
 
 <style scoped>
@@ -294,4 +294,5 @@ onMounted(loadFiles)
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 </style>

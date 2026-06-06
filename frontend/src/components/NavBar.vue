@@ -14,12 +14,20 @@
       <router-link to="/search" class="nav-link">搜索</router-link>
       <router-link to="/stats" class="nav-link">统计</router-link>
       <router-link to="/admin" class="nav-link">管理</router-link>
+      <!-- 主题下拉 -->
+      <select class="theme-nav-select" :value="currentTheme" @change="switchTheme($event.target.value)">
+        <option v-for="t in themeList" :key="t.key" :value="t.key">{{ t.label }}</option>
+      </select>
     </div>
   </nav>
 </template>
 
 <script setup>
+import { useTheme } from '@/composables/useTheme'
+
 defineEmits(['toggle-sidebar'])
+
+const { themeList, currentTheme, switchTheme } = useTheme()
 </script>
 
 <style scoped>
@@ -72,9 +80,36 @@ defineEmits(['toggle-sidebar'])
 .nav-link:hover { color: #fff; }
 .nav-link.router-link-active { color: #e94560; font-weight: bold; }
 
+/* 导航栏主题下拉 */
+.theme-nav-select {
+  margin-left: 8px;
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 4px;
+  color: rgba(255,255,255,0.7);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.theme-nav-select:hover {
+  border-color: rgba(255,255,255,0.3);
+  color: #fff;
+}
+.theme-nav-select:focus {
+  outline: none;
+  border-color: #7c4d9e;
+}
+.theme-nav-select option {
+  background: #1a1a2e;
+  color: #ccc;
+}
+
 @media (max-width: 768px) {
   .navbar { padding: 0 12px; }
   .navbar-brand { font-size: 15px; }
   .nav-link { font-size: 12px; }
+  .theme-nav-select { font-size: 11px; max-width: 100px; }
 }
 </style>
