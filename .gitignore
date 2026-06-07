@@ -32,3 +32,4 @@ docs/search.db
 # 操作系统
 __pycache__/
 *.pyc
+.gstack/

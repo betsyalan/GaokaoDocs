@@ -39,7 +39,7 @@
     <nav v-else class="sidebar-files">
       <router-link
         v-for="f in files" :key="f.path"
-        :to="`/file/${f.path}`"
+        :to="f.ext === 'xlsx' ? '/volunteer' : `/file/${f.path}`"
         :class="['file-item', { active: isActiveFile(f.path) }]"
         @click="$emit('close')"
       >
@@ -65,13 +65,14 @@ const loading = ref(true)
 const error = ref(null)
 const activeType = ref('')
 
-const iconMap = { html: '🌐', md: '📝', pdf: '📕' }
+const iconMap = { html: '🌐', md: '📝', pdf: '📕', xlsx: '📊' }
 
 const types = [
   { key: '', label: '全部' },
   { key: 'md', label: 'MD' },
   { key: 'html', label: 'HTML' },
-  { key: 'pdf', label: 'PDF' }
+  { key: 'pdf', label: 'PDF' },
+  { key: 'xlsx', label: 'XLSX' }
 ]
 
 function isActiveFile(filePath) {

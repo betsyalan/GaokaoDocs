@@ -1,7 +1,7 @@
 <template>
   <iframe
     :srcdoc="content"
-    sandbox="allow-same-origin"
+    sandbox="allow-same-origin allow-scripts"
     class="iframe-viewer"
   ></iframe>
 </template>

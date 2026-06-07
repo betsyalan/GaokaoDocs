@@ -8,6 +8,7 @@ import searchRoutes from './routes/search.js'
 import tagRoutes from './routes/tags.js'
 import statsRoutes from './routes/stats.js'
 import adminRoutes from './routes/admin.js'
+import volunteerRoutes from './routes/volunteer.js'
 import { statsMiddleware, initStats } from './middleware/stats.js'
 import { initSearch, buildIndex } from './services/searchIndex.js'
 
@@ -26,12 +27,16 @@ app.use('/api', searchRoutes)
 app.use('/api', tagRoutes)
 app.use('/api', statsRoutes)
 app.use('/api', adminRoutes)
+app.use('/api', volunteerRoutes)
 
 // PDF 等大文件访问
 app.use('/docs', express.static(path.resolve('./docs')))
 
 // 托管前端静态文件
 app.use(express.static(path.join(__dirname, '../dist')))
+
+// 托管项目根目录静态文件（如志愿表预览.html 等独立页面）
+app.use(express.static(path.join(__dirname, '..')))
 
 // API 404 兜底：未知 API 路由返回 JSON 而非 SPA 页面
 app.use('/api', (req, res) => {

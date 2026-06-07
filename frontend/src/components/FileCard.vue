@@ -1,5 +1,5 @@
 <template>
-  <router-link :to="`/file/${file.path}`" class="file-card">
+  <router-link :to="file.ext === 'xlsx' ? '/volunteer' : `/file/${file.path}`" class="file-card">
     <span class="file-icon">{{ iconMap[file.ext] || '📄' }}</span>
     <div class="file-info">
       <div class="file-name">{{ file.name }}</div>
@@ -13,7 +13,7 @@
 <script setup>
 defineProps({ file: Object })
 
-const iconMap = { html: '🌐', md: '📝', pdf: '📕' }
+const iconMap = { html: '🌐', md: '📝', pdf: '📕', xlsx: '📊' }
 
 function formatSize(bytes) {
   if (bytes < 1024) return `${bytes}B`

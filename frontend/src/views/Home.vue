@@ -42,7 +42,8 @@ const types = [
   { key: '', label: '全部' },
   { key: 'md', label: 'Markdown' },
   { key: 'html', label: 'HTML' },
-  { key: 'pdf', label: 'PDF' }
+  { key: 'pdf', label: 'PDF' },
+  { key: 'xlsx', label: 'Excel' }
 ]
 
 async function loadFiles() {

@@ -18,8 +18,8 @@ const bodyBgMap = {
   ziyan:  '#ede6f0',
 }
 
-// 当前主题（默认紫烟）
-const currentTheme = ref(localStorage.getItem('md-theme') || 'ziyan')
+// 当前主题（默认琥珀橙）
+const currentTheme = ref(localStorage.getItem('md-theme') || 'chenger')
 
 // 切换主题
 function switchTheme(key) {

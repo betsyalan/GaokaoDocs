@@ -12,6 +12,7 @@
     <div class="navbar-links">
       <router-link to="/" class="nav-link">首页</router-link>
       <router-link to="/search" class="nav-link">搜索</router-link>
+      <router-link to="/volunteer" class="nav-link">志愿表</router-link>
       <router-link to="/stats" class="nav-link">统计</router-link>
       <router-link to="/admin" class="nav-link">管理</router-link>
       <!-- 主题下拉 -->

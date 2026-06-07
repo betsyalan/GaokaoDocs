@@ -18,7 +18,7 @@ export async function getFiles(type = null) {
     if (entry.name.startsWith('.')) continue
 
     const ext = path.extname(entry.name).toLowerCase().replace('.', '')
-    if (!['html', 'md', 'pdf'].includes(ext)) continue
+    if (!['html', 'md', 'pdf', 'xlsx'].includes(ext)) continue
     if (type && ext !== type) continue
 
     const stat = await fs.stat(path.join(DOCS_DIR, entry.name))
