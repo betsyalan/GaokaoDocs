@@ -4,17 +4,97 @@ body {
   background: #f5f5f5;
   color: #333;
   min-height: 100vh;
+  transition: background 0.3s;
 }
-a { color: #1a73e8; text-decoration: none; }
+a { color: var(--accent-color, #1a73e8); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
-.page-title { font-size: 24px; margin-bottom: 20px; color: #1a1a2e; }
+.page-title { font-size: 24px; margin-bottom: 20px; color: var(--text-primary, #1a1a2e); }
 
 /* 加载中 */
-.loading { text-align: center; padding: 40px; color: #999; font-size: 14px; }
+.loading { text-align: center; padding: 40px; color: var(--text-secondary, #999); font-size: 14px; }
 /* 错误提示 */
 .error-msg { text-align: center; padding: 40px; color: #e94560; }
 /* 空状态 */
-.empty-state { text-align: center; padding: 60px 20px; color: #999; }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary, #999); }
 .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+/* =====================================================
+   三套主题的外围 UI 变量
+   ===================================================== */
+
+/* ---- 琉璃蓝 · 现代简约 ---- */
+body.theme-liuli {
+  --body-bg: #f4f6f9;
+  --nav-bg: #f4f6f9;
+  --nav-text: #0a2540;
+  --nav-text-secondary: #7a8aa0;
+  --nav-accent: #1e6bb8;
+  --nav-border: #dce4ee;
+  --nav-hover-bg: #e8edf4;
+  --sidebar-bg: #f4f6f9;
+  --sidebar-text: #2c3e50;
+  --sidebar-text-secondary: #7a8aa0;
+  --sidebar-accent: #1e6bb8;
+  --sidebar-hover-bg: #e8edf4;
+  --sidebar-active-bg: rgba(30, 107, 184, 0.08);
+  --sidebar-border: #dce4ee;
+  --card-bg: #ffffff;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 6px 24px rgba(0,0,0,0.05);
+  --accent-color: #1e6bb8;
+  --accent-hover: #1557a0;
+  --text-primary: #0a2540;
+  --text-secondary: #7a8aa0;
+  --border-color: #dce4ee;
+}
+
+/* ---- 琥珀橙 · 温暖现代 ---- */
+body.theme-chenger {
+  --body-bg: #f7ede0;
+  --nav-bg: #f7ede0;
+  --nav-text: #5c2a16;
+  --nav-text-secondary: #9a8a7a;
+  --nav-accent: #c94f2b;
+  --nav-border: #e8dbcf;
+  --nav-hover-bg: #efe4d6;
+  --sidebar-bg: #f7ede0;
+  --sidebar-text: #4a3f37;
+  --sidebar-text-secondary: #9a8a7a;
+  --sidebar-accent: #c94f2b;
+  --sidebar-hover-bg: #efe4d6;
+  --sidebar-active-bg: rgba(201, 79, 43, 0.08);
+  --sidebar-border: #e8dbcf;
+  --card-bg: #fffcf9;
+  --card-shadow: 0 2px 4px rgba(0,0,0,0.03), 0 12px 40px rgba(0,0,0,0.06);
+  --accent-color: #c94f2b;
+  --accent-hover: #b03e1e;
+  --text-primary: #5c2a16;
+  --text-secondary: #9a8a7a;
+  --border-color: #e8dbcf;
+}
+
+/* ---- 紫烟 · 优雅现代 ---- */
+body.theme-ziyan {
+  --body-bg: #ede6f0;
+  --nav-bg: #ede6f0;
+  --nav-text: #2d1b3d;
+  --nav-text-secondary: #8a7a9a;
+  --nav-accent: #7c4d9e;
+  --nav-border: #ddd4e6;
+  --nav-hover-bg: #e2d8ea;
+  --sidebar-bg: #ede6f0;
+  --sidebar-text: #3a3042;
+  --sidebar-text-secondary: #8a7a9a;
+  --sidebar-accent: #7c4d9e;
+  --sidebar-hover-bg: #e2d8ea;
+  --sidebar-active-bg: rgba(124, 77, 158, 0.08);
+  --sidebar-border: #ddd4e6;
+  --card-bg: #ffffff;
+  --card-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 32px rgba(74,44,94,0.06);
+  --accent-color: #7c4d9e;
+  --accent-hover: #6a3d86;
+  --text-primary: #2d1b3d;
+  --text-secondary: #8a7a9a;
+  --border-color: #ddd4e6;
+}

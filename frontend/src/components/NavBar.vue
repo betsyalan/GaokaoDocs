@@ -38,8 +38,10 @@ const { themeList, currentTheme, switchTheme } = useTheme()
   justify-content: space-between;
   padding: 0 16px;
   height: 56px;
-  background: #1a1a2e;
-  color: #eee;
+  background: var(--nav-bg, #1a1a2e);
+  color: var(--nav-text, #eee);
+  border-bottom: 1px solid var(--nav-border, transparent);
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
 }
 .navbar-left {
   display: flex;
@@ -55,18 +57,18 @@ const { themeList, currentTheme, switchTheme } = useTheme()
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: rgba(255,255,255,0.6);
+  color: var(--nav-text-secondary, rgba(255,255,255,0.6));
   cursor: pointer;
   transition: all 0.15s;
 }
 .menu-btn:hover {
-  background: rgba(255,255,255,0.08);
-  color: #fff;
+  background: var(--nav-hover-bg, rgba(255,255,255,0.08));
+  color: var(--nav-text, #fff);
 }
 .navbar-brand {
   font-size: 18px;
   font-weight: bold;
-  color: #e94560;
+  color: var(--nav-accent, #e94560);
   text-decoration: none;
 }
 .navbar-links {
@@ -74,37 +76,37 @@ const { themeList, currentTheme, switchTheme } = useTheme()
   gap: 16px;
 }
 .nav-link {
-  color: #ccc;
+  color: var(--nav-text-secondary, #ccc);
   text-decoration: none;
   font-size: 14px;
 }
-.nav-link:hover { color: #fff; }
-.nav-link.router-link-active { color: #e94560; font-weight: bold; }
+.nav-link:hover { color: var(--nav-text, #fff); }
+.nav-link.router-link-active { color: var(--nav-accent, #e94560); font-weight: bold; }
 
 /* 导航栏主题下拉 */
 .theme-nav-select {
   margin-left: 8px;
   padding: 4px 8px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: var(--nav-hover-bg, rgba(255,255,255,0.08));
+  border: 1px solid var(--nav-border, rgba(255,255,255,0.12));
   border-radius: 4px;
-  color: rgba(255,255,255,0.7);
+  color: var(--nav-text-secondary, rgba(255,255,255,0.7));
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
 }
 .theme-nav-select:hover {
-  border-color: rgba(255,255,255,0.3);
-  color: #fff;
+  border-color: var(--nav-accent, rgba(255,255,255,0.3));
+  color: var(--nav-text, #fff);
 }
 .theme-nav-select:focus {
   outline: none;
-  border-color: #7c4d9e;
+  border-color: var(--nav-accent, #7c4d9e);
 }
 .theme-nav-select option {
-  background: #1a1a2e;
-  color: #ccc;
+  background: var(--nav-bg, #1a1a2e);
+  color: var(--nav-text-secondary, #ccc);
 }
 
 @media (max-width: 768px) {

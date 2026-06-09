@@ -61,9 +61,9 @@ const sidebarOpen = ref(false)
 .main-content {
   flex: 1;
   overflow-y: auto;
-  background: #f5f5f5;
+  background: var(--body-bg, #f5f5f5);
   position: relative;
-  transition: margin-left 0.3s ease;
+  transition: margin-left 0.3s ease, background 0.3s;
 }
 .main-content::-webkit-scrollbar {
   width: 6px;
@@ -83,15 +83,18 @@ const sidebarOpen = ref(false)
   height: 48px;
   border: none;
   border-radius: 0 6px 6px 0;
-  background: #1a1a2e;
-  color: rgba(255,255,255,0.5);
+  background: var(--nav-bg, #1a1a2e);
+  color: var(--nav-text-secondary, rgba(255,255,255,0.5));
   cursor: pointer;
   z-index: 50;
-  transition: all 0.2s;
+  transition: all 0.2s, background 0.3s;
+  border: 1px solid var(--nav-border, transparent);
+  border-left: none;
 }
 .sidebar-pull:hover {
   color: #fff;
-  background: #e94560;
+  background: var(--sidebar-accent, #e94560);
+  border-color: var(--sidebar-accent, #e94560);
 }
 .main-content.sidebar-hidden .sidebar-pull {
   display: flex;

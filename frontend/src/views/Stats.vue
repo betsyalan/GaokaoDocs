@@ -92,29 +92,31 @@ onMounted(async () => {
 <style scoped>
 .stat-cards { display: flex; gap: 16px; margin-bottom: 24px; }
 .stat-card {
-  flex: 1; background: #fff; padding: 24px; border-radius: 8px;
-  text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  flex: 1; background: var(--card-bg, #fff); padding: 24px; border-radius: 8px;
+  text-align: center; box-shadow: var(--card-shadow, 0 1px 3px rgba(0,0,0,0.1));
+  transition: background 0.3s, box-shadow 0.3s;
 }
-.stat-num { font-size: 36px; font-weight: bold; color: #1a73e8; }
-.stat-label { font-size: 14px; color: #999; margin-top: 4px; }
+.stat-num { font-size: 36px; font-weight: bold; color: var(--accent-color, #1a73e8); }
+.stat-label { font-size: 14px; color: var(--text-secondary, #999); margin-top: 4px; }
 
 .section {
-  background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  background: var(--card-bg, #fff); padding: 20px; border-radius: 8px; margin-bottom: 16px;
+  box-shadow: var(--card-shadow, 0 1px 3px rgba(0,0,0,0.1));
+  transition: background 0.3s, box-shadow 0.3s;
 }
-.section h2 { font-size: 16px; margin-bottom: 16px; color: #1a1a2e; }
+.section h2 { font-size: 16px; margin-bottom: 16px; color: var(--text-primary, #1a1a2e); }
 
 .rank-row {
   display: flex; align-items: center; gap: 12px;
-  padding: 8px 0; border-bottom: 1px solid #f5f5f5;
+  padding: 8px 0; border-bottom: 1px solid var(--border-color, #f5f5f5);
 }
 .rank-row:last-child { border-bottom: none; }
 .rank-num {
-  width: 28px; font-weight: bold; color: #999;
+  width: 28px; font-weight: bold; color: var(--text-secondary, #999);
   font-size: 14px;
 }
 .rank-file { flex: 1; font-size: 14px; }
-.rank-views { font-size: 13px; color: #999; white-space: nowrap; }
+.rank-views { font-size: 13px; color: var(--text-secondary, #999); white-space: nowrap; }
 
 .bar-chart {
   display: flex; align-items: flex-end; gap: 2px;
@@ -125,10 +127,10 @@ onMounted(async () => {
   align-items: center; min-width: 20px;
 }
 .bar-fill {
-  width: 100%; background: #1a73e8; border-radius: 2px 2px 0 0;
-  min-height: 2px; transition: height 0.3s; cursor: help;
+  width: 100%; background: var(--accent-color, #1a73e8); border-radius: 2px 2px 0 0;
+  min-height: 2px; transition: height 0.3s, background 0.3s; cursor: help;
 }
-.bar-fill:hover { background: #1557b0; }
+.bar-fill:hover { background: var(--accent-hover, #1557b0); }
 .bar-label {
   font-size: 10px; color: #999; margin-top: 4px;
   white-space: nowrap;

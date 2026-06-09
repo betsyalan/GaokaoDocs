@@ -15,7 +15,8 @@ defineProps({ content: String })
   width: 100%;
   min-height: 80vh;
   border: none;
-  background: #fff;
+  background: var(--card-bg, #fff);
   border-radius: 8px;
+  transition: background 0.3s;
 }
 </style>

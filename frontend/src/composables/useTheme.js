@@ -27,9 +27,10 @@ function switchTheme(key) {
   localStorage.setItem('md-theme', key)
 }
 
-// 切换时同步 body 背景
+// 切换时同步 body 背景和主题 class
 watch(currentTheme, (key) => {
   document.body.style.background = bodyBgMap[key] || ''
+  document.body.className = 'theme-' + key
 }, { immediate: true })
 
 export function useTheme() {

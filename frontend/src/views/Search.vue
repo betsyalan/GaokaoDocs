@@ -69,27 +69,29 @@ function onSearch() {
   width: 100%;
   padding: 12px 16px;
   font-size: 16px;
-  border: 2px solid #ddd;
+  border: 2px solid var(--border-color, #ddd);
   border-radius: 8px;
+  background: var(--card-bg, #fff);
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, background 0.3s;
 }
-.search-input:focus { border-color: #1a73e8; }
+.search-input:focus { border-color: var(--accent-color, #1a73e8); }
 .result-item {
-  background: #fff;
+  background: var(--card-bg, #fff);
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: var(--card-shadow, 0 1px 3px rgba(0,0,0,0.1));
+  transition: background 0.3s, box-shadow 0.3s;
 }
 .result-title {
   font-size: 16px;
   font-weight: 500;
-  color: #1a73e8;
+  color: var(--accent-color, #1a73e8);
 }
 .result-snippet {
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary, #666);
   margin-top: 8px;
   line-height: 1.6;
 }

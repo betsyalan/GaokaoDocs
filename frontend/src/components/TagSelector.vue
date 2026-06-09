@@ -39,14 +39,14 @@ function addTag() {
 .tag {
   display: inline-block;
   padding: 2px 10px;
-  background: #e8f0fe;
-  color: #1a73e8;
+  background: color-mix(in srgb, var(--accent-color, #1a73e8) 12%, transparent);
+  color: var(--accent-color, #1a73e8);
   border-radius: 12px;
   font-size: 12px;
   cursor: pointer;
 }
-.tag:hover { background: #fce8e6; color: #e94560; }
-.no-tags { font-size: 12px; color: #ccc; }
-.tag-input { padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; width: 140px; }
-.tag-input:focus { border-color: #1a73e8; outline: none; }
+.tag:hover { background: color-mix(in srgb, #e94560 12%, transparent); color: #e94560; }
+.no-tags { font-size: 12px; color: var(--text-secondary, #ccc); }
+.tag-input { padding: 4px 8px; border: 1px solid var(--border-color, #ddd); border-radius: 4px; font-size: 13px; width: 140px; background: var(--card-bg, #fff); }
+.tag-input:focus { border-color: var(--accent-color, #1a73e8); outline: none; }
 </style>

@@ -85,8 +85,8 @@ watch(
 .doc-header {
   margin-bottom: 20px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border-color, #ddd);
 }
 .doc-header h1 { font-size: 22px; margin-bottom: 8px; }
-.doc-meta { font-size: 13px; color: #999; }
+.doc-meta { font-size: 13px; color: var(--text-secondary, #999); }
 </style>

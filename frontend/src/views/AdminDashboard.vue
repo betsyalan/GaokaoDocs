@@ -123,35 +123,37 @@ async function updateTags(file, tags) {
   max-width: 320px;
   margin: 60px auto;
   text-align: center;
-  background: #fff;
+  background: var(--card-bg, #fff);
   padding: 32px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--card-shadow, 0 2px 8px rgba(0,0,0,0.1));
 }
-.login-box h2 { font-size: 18px; margin-bottom: 20px; color: #1a1a2e; }
+.login-box h2 { font-size: 18px; margin-bottom: 20px; color: var(--text-primary, #1a1a2e); }
 .pwd-input {
   width: 100%; padding: 10px 12px; margin-bottom: 12px;
-  border: 1px solid #ddd; border-radius: 4px; font-size: 16px;
+  border: 1px solid var(--border-color, #ddd); border-radius: 4px; font-size: 16px;
+  background: var(--card-bg, #fff);
 }
-.pwd-input:focus { border-color: #1a73e8; outline: none; }
+.pwd-input:focus { border-color: var(--accent-color, #1a73e8); outline: none; }
 .login-btn {
-  width: 100%; padding: 10px; background: #1a73e8; color: #fff;
+  width: 100%; padding: 10px; background: var(--accent-color, #1a73e8); color: #fff;
   border: none; border-radius: 4px; cursor: pointer; font-size: 15px;
 }
-.login-btn:hover { background: #1557b0; }
+.login-btn:hover { background: var(--accent-hover, #1557b0); }
 .login-btn:disabled { background: #ccc; cursor: default; }
 
 .section {
-  background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  background: var(--card-bg, #fff); padding: 20px; border-radius: 8px; margin-bottom: 16px;
+  box-shadow: var(--card-shadow, 0 1px 3px rgba(0,0,0,0.1));
+  transition: background 0.3s, box-shadow 0.3s;
 }
-.section h2 { font-size: 16px; margin-bottom: 16px; color: #1a1a2e; }
+.section h2 { font-size: 16px; margin-bottom: 16px; color: var(--text-primary, #1a1a2e); }
 .upload-area { margin-bottom: 8px; }
-.upload-msg { font-size: 13px; color: #666; margin-top: 8px; }
+.upload-msg { font-size: 13px; color: var(--text-secondary, #666); margin-top: 8px; }
 
 .admin-row {
   display: flex; align-items: center; gap: 12px;
-  padding: 12px 0; border-bottom: 1px solid #eee; flex-wrap: wrap;
+  padding: 12px 0; border-bottom: 1px solid var(--border-color, #eee); flex-wrap: wrap;
 }
 .admin-row:last-child { border-bottom: none; }
 .admin-fname { min-width: 180px; font-size: 14px; font-weight: 500; }

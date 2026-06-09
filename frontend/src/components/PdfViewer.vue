@@ -59,22 +59,24 @@ function nextPage() {
 </script>
 
 <style scoped>
-.pdf-viewer { background: #fff; border-radius: 8px; overflow: hidden; }
+.pdf-viewer { background: var(--card-bg, #fff); border-radius: 8px; overflow: hidden; transition: background 0.3s; }
 .pdf-toolbar {
   display: flex; align-items: center; justify-content: center;
-  gap: 16px; padding: 12px; background: #f8f8f8; border-bottom: 1px solid #eee;
+  gap: 16px; padding: 12px; background: var(--body-bg, #f8f8f8); border-bottom: 1px solid var(--border-color, #eee);
+  transition: background 0.3s, border-color 0.3s;
 }
 .pdf-toolbar button {
   padding: 4px 16px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color, #ddd);
   border-radius: 4px;
-  background: #fff;
+  background: var(--card-bg, #fff);
   cursor: pointer;
   font-size: 13px;
+  transition: background 0.3s, border-color 0.3s;
 }
-.pdf-toolbar button:hover:not(:disabled) { background: #eee; }
+.pdf-toolbar button:hover:not(:disabled) { background: var(--body-bg, #eee); }
 .pdf-toolbar button:disabled { opacity: 0.5; cursor: default; }
-.page-info { font-size: 14px; color: #666; }
+.page-info { font-size: 14px; color: var(--text-secondary, #666); }
 .pdf-canvas-wrap { padding: 16px; text-align: center; overflow-x: auto; }
 canvas { max-width: 100%; height: auto; }
 </style>
