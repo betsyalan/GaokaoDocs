@@ -24,6 +24,16 @@ def parse_year_data(row):
             result[year] = obj
     return result
 
+def make_file_label(stem):
+    """从文件名去除时间戳后缀，生成简短的显示标签（如 '600分', '630分 (方案4)'）"""
+    clean = re.sub(r'_\d{14}$', '', stem)           # 去掉尾部时间戳
+    score_match = re.search(r'(\d+分)', clean)
+    score = score_match.group(1) if score_match else '未知'
+    ver_match = re.search(r'志愿表(\d+)', clean)     # 检测版本号（如 "志愿表4"）
+    version_suffix = f' (方案{ver_match.group(1)})' if ver_match else ''
+    return f"{score}{version_suffix}"
+
+
 def parse_excel(filepath):
     wb = openpyxl.load_workbook(filepath, data_only=True)
     ws = wb.active
@@ -87,20 +97,25 @@ def parse_excel(filepath):
     if current_group:
         groups.append(current_group)
 
-    score_match = re.search(r'(\d+分)', filepath)
-    score = score_match.group(1) if score_match else 'unknown'
+    # --- 唯一键：使用文件名（去扩展名），确保每个 Excel 文件独立一页 ---
+    stem = os.path.basename(filepath).replace('.xlsx', '')
+    file_label = make_file_label(stem)
+    score_match = re.search(r'(\d+分)', stem)
+    score_val = score_match.group(1) if score_match else 'unknown'
 
     meta_raw = str(list(ws.iter_rows(min_row=1, max_row=1, values_only=True))[0][0] or '')
     parts = meta_raw.split()
 
     return {
-        score: {
+        stem: {
             'meta': {
                 'province': parts[1] if len(parts) > 1 else '',
                 'gender': parts[3] if len(parts) > 3 else '',
                 'level': parts[4] if len(parts) > 4 else '',
-                'score': parts[5] if len(parts) > 5 else '',
-                'subjects': parts[7] if len(parts) > 7 else ''
+                'score': score_val,
+                'subjects': parts[7] if len(parts) > 7 else '',
+                'file_label': file_label,   # 前端显示的简短标签
+                'filename': os.path.basename(filepath)
             },
             'groups': groups
         }

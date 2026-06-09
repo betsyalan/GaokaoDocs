@@ -8,15 +8,16 @@
     <div v-else-if="!data" class="empty-state"><div class="icon">📂</div><p>暂无志愿表数据</p></div>
 
     <template v-else>
-      <header class="vol-header"><h1>📋 广东高考志愿表</h1></header>
+      <header class="vol-header"><h1>📋 高考志愿表预览</h1></header>
 
-      <!-- 分数标签 -->
-      <div class="tab-bar">
-        <button v-for="(d, t) in data" :key="t"
-          :class="['tab-btn', { active: activeTab === t }]"
-          @click="switchTab(t)">
-          {{ activeTab === t ? '🟢' : '🔵' }} {{ t }}
-          <span class="tab-badge">{{ d.groups.length }} 组院校</span>
+      <!-- 文件选择器：每个 Excel 文件独立一页 -->
+      <div class="file-bar">
+        <button v-for="(d, key) in data" :key="key"
+          :class="['file-btn', { active: activeTab === key }]"
+          @click="switchFile(key)">
+          <span class="file-btn-dot">{{ activeTab === key ? '📄' : '📋' }}</span>
+          <span class="file-btn-label">{{ d.meta.file_label || key }}</span>
+          <span class="file-btn-badge">{{ d.groups.length }} 组</span>
         </button>
       </div>
 
@@ -187,8 +188,8 @@ async function fetchData() {
 }
 fetchData()
 
-function switchTab(tab) {
-  activeTab.value = tab
+function switchFile(key) {
+  activeTab.value = key
   expandedGroups.value = new Set()
   activeFilter.value = 'all'
   searchQuery.value = ''
@@ -349,29 +350,30 @@ const filteredGroups = computed(() => {
   --bg-th: #2d1b3d; --color-th: #f0eaf5; --border-td: #e8e0ee; --bg-stripe: #f8f4fb;
 }
 
-/* ========== Tab 栏 ========== */
-.tab-bar {
-  display: flex; gap: 0; margin-bottom: 20px;
-  background: var(--card-bg); border-radius: 10px; overflow: hidden;
+/* ========== 文件选择栏（代替原分数 Tab） ========== */
+.file-bar {
+  display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.file-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 18px; border: 1px solid var(--border-subtle); border-radius: 10px;
+  background: var(--card-bg); cursor: pointer; font-size: 14px;
+  color: var(--text-body); transition: all .25s; font-family: inherit;
   box-shadow: var(--card-shadow);
 }
-.tab-btn {
-  flex: 1; padding: 12px 20px; border: none; background: transparent;
-  font-size: 15px; font-weight: 600; cursor: pointer;
-  color: var(--text-body); position: relative; transition: all .25s;
-  font-family: inherit;
+.file-btn:hover { border-color: var(--color-accent); color: var(--color-h2); }
+.file-btn.active {
+  background: var(--color-accent); color: #fff; border-color: var(--color-accent);
 }
-.tab-btn::after {
-  content: ''; position: absolute; bottom: 0; left: 20%; right: 20%;
-  height: 3px; background: transparent; border-radius: 3px 3px 0 0; transition: all .25s;
-}
-.tab-btn:hover { color: var(--color-h2); }
-.tab-btn.active { color: var(--color-h2); }
-.tab-btn.active::after { background: var(--color-accent); left: 10%; right: 10%; }
-.tab-btn .tab-badge {
+.file-btn-dot { font-size: 16px; }
+.file-btn-label { font-weight: 600; }
+.file-btn-badge {
   display: inline-block; font-size: 11px; background: var(--tag-bg);
   color: var(--tag-color); padding: 1px 8px; border-radius: 10px;
-  margin-left: 6px; font-weight: 400;
+  font-weight: 400;
+}
+.file-btn.active .file-btn-badge {
+  background: rgba(255,255,255,0.2); color: #fff;
 }
 
 /* ========== 元信息 ========== */
