@@ -100,7 +100,8 @@ def parse_excel(filepath):
     # --- 唯一键：使用文件名（去扩展名），确保每个 Excel 文件独立一页 ---
     stem = os.path.basename(filepath).replace('.xlsx', '')
     file_label = make_file_label(stem)
-    score_match = re.search(r'(\d+分)', stem)
+    clean = re.sub(r'_\d{14}$', '', stem)  # 先去除时间戳，与 make_file_label 内部逻辑一致
+    score_match = re.search(r'(\d+分)', clean)
     score_val = score_match.group(1) if score_match else 'unknown'
 
     meta_raw = str(list(ws.iter_rows(min_row=1, max_row=1, values_only=True))[0][0] or '')

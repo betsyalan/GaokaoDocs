@@ -16,7 +16,7 @@
           :class="['file-btn', { active: activeTab === key }]"
           @click="switchFile(key)">
           <span class="file-btn-dot">{{ activeTab === key ? '📄' : '📋' }}</span>
-          <span class="file-btn-label">{{ d.meta.file_label || key }}</span>
+          <span class="file-btn-label">{{ fileDisplayLabel(d.meta, key) }}</span>
           <span class="file-btn-badge">{{ d.groups.length }} 组</span>
         </button>
       </div>
@@ -163,7 +163,7 @@ const { currentTheme } = useTheme()
 const data = ref(null)
 const loading = ref(true)
 const error = ref(null)
-const activeTab = ref('600分')
+const activeTab = ref('')
 const activeFilter = ref('all')
 const searchQuery = ref('')
 const expandedGroups = ref(new Set())
@@ -187,6 +187,13 @@ async function fetchData() {
   } finally { loading.value = false }
 }
 fetchData()
+
+/** 文件按钮显示标签：优先 file_label，回退为从键名中提取分数，最长 20 字防撑破布局 */
+function fileDisplayLabel(meta, key) {
+  if (meta.file_label) return meta.file_label
+  const m = String(key).match(/(\d+分)/)
+  return m ? m[1] : String(key).slice(0, 20)
+}
 
 function switchFile(key) {
   activeTab.value = key
