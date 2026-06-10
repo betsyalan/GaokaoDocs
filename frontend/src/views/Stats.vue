@@ -38,12 +38,12 @@
 
       <!-- 近日访问趋势 -->
       <section class="section">
-        <h2>📈 近 30 天访问趋势</h2>
-        <div v-if="dailyKeys.length > 0" class="bar-chart">
-          <div v-for="(count, date) in sortedDaily" :key="date" class="bar-item">
+        <h2>📈 近 24 小时访问趋势</h2>
+        <div v-if="hourlyKeys.length > 0" class="bar-chart">
+          <div v-for="(count, hour) in sortedHourly" :key="hour" class="bar-item">
             <div class="bar-fill" :style="{ height: barHeight(count) + '%' }"
-                 :title="`${date}: ${count} 次`"></div>
-            <div class="bar-label">{{ date.slice(5) }}</div>
+                 :title="`${hour}:00 - ${count} 次`"></div>
+            <div class="bar-label">{{ hour.slice(11) }}时</div>
           </div>
         </div>
         <div v-else class="empty-state">
@@ -62,15 +62,15 @@ const stats = ref({})
 const loading = ref(true)
 const error = ref(null)
 
-const sortedDaily = computed(() => {
-  const daily = stats.value.dailyViews || {}
-  return Object.entries(daily)
+const sortedHourly = computed(() => {
+  const hourly = stats.value.dailyViews || {}
+  return Object.entries(hourly)
     .sort(([a], [b]) => a.localeCompare(b))
-    .slice(-30)
+    .slice(-24)
     .reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {})
 })
 
-const dailyKeys = computed(() => Object.keys(sortedDaily.value))
+const hourlyKeys = computed(() => Object.keys(sortedHourly.value))
 
 function barHeight(count) {
   const values = Object.values(stats.value.dailyViews || {})
