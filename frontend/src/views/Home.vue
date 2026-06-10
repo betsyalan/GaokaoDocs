@@ -97,7 +97,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { api } from '@/api'
 import FileCard from '@/components/FileCard.vue'
-import { BookOpen, GraduationCap, Target, BarChart3, FileText, Globe, ScrollText, BarChart4, FolderOpen } from 'lucide-vue-next'
+import { BookOpen, GraduationCap, Target, BarChart3, Globe, ScrollText, BarChart4, FolderOpen } from 'lucide-vue-next'
 
 const files = ref([])
 const loading = ref(true)
@@ -111,7 +111,6 @@ const categoryDefs = {
   university: { key: 'university', icon: GraduationCap, label: '大学信息', color: '#1e6bb8' },
   guide:      { key: 'guide',      icon: Target,        label: '报考指南', color: '#c94f2b' },
   data:       { key: 'data',       icon: BarChart3,     label: '志愿数据', color: '#7c4d9e' },
-  reference:  { key: 'reference',  icon: FileText,      label: '参考资料', color: '#8b7355' },
   admission:  { key: 'admission',  icon: ScrollText,    label: '历年录取分', color: '#2563eb', isData: true },
   distribution: { key: 'distribution', icon: BarChart4, label: '一分一段表', color: '#0891b2', isData: true },
   page:       { key: 'page',       icon: Globe,         label: '其他页面', color: '#6b7280' },
@@ -120,8 +119,7 @@ const categoryDefs = {
 // 分类展示顺序
 const catOrder = [categoryDefs.major, categoryDefs.admission, categoryDefs.university,
                   categoryDefs.guide, categoryDefs.data,
-                  categoryDefs.distribution, categoryDefs.reference,
-                  categoryDefs.page]
+                  categoryDefs.distribution, categoryDefs.page]
 
 // 历年录取分的大学列表（按省份分组）
 const universitiesByProvince = ref([])

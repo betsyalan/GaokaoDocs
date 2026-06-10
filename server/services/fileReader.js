@@ -13,8 +13,8 @@ function classifyFile(filename, ext) {
   // Excel 文件 → 志愿数据
   if (ext === 'xlsx') return 'data'
 
-  // PDF → 参考资料
-  if (ext === 'pdf') return 'reference'
+  // PDF → 报考指南
+  if (ext === 'pdf') return 'guide'
 
   // 文件名包含报考/高考/对比类关键词 → 报考指南
   if (/报考|高考|志愿填报|专业对比|热门专业|VS/.test(filename)) return 'guide'

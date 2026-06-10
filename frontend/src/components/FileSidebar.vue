@@ -106,7 +106,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { api } from '@/api'
-import { BookOpen, GraduationCap, Target, BarChart3, FileText, Globe, FilePen, Code2, BookMarked, Table, File, ScrollText, BarChart4, AlertTriangle, FolderOpen } from 'lucide-vue-next'
+import { BookOpen, GraduationCap, Target, BarChart3, Globe, FilePen, Code2, BookMarked, Table, File, ScrollText, BarChart4, AlertTriangle, FolderOpen } from 'lucide-vue-next'
 defineProps({
   open: { type: Boolean, default: false }
 })
@@ -133,7 +133,6 @@ const catOrder = [
   { key: 'university', icon: GraduationCap, label: '大学信息' },
   { key: 'guide',      icon: Target,        label: '报考指南' },
   { key: 'data',       icon: BarChart3,     label: '志愿数据' },
-  { key: 'reference',  icon: FileText,      label: '参考资料' },
   { key: 'admission',  icon: ScrollText,    label: '历年录取分', isData: true },
   { key: 'distribution', icon: BarChart4,   label: '一分一段表', isData: true },
   { key: 'page',       icon: Globe,         label: '其他页面' },

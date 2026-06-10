@@ -25,7 +25,6 @@ const catConfig = {
   major:      { label: '专业', color: '#0d9488' },
   guide:      { label: '报考', color: '#c94f2b' },
   data:       { label: '数据', color: '#7c4d9e' },
-  reference:  { label: '参考', color: '#8b7355' },
   page:       { label: '页面', color: '#6b7280' },
 }
 
