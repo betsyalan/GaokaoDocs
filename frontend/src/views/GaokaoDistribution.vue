@@ -128,6 +128,9 @@ onMounted(async () => {
 .data-table tbody tr:hover {
   background: var(--body-bg, #f5f5f5);
 }
+.data-table tbody tr:nth-child(even) {
+  background: var(--body-bg, #f5f5f5);
+}
 .data-table tbody tr:last-child td {
   border-bottom: none;
 }

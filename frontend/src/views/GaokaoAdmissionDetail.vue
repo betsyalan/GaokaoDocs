@@ -298,6 +298,9 @@ watch(
 .data-table tbody tr:hover {
   background: var(--body-bg, #f0f0f0);
 }
+.data-table tbody tr:nth-child(even) {
+  background: var(--body-bg, #f0f0f0);
+}
 .data-table tbody tr:last-child td {
   border-bottom: none;
 }
