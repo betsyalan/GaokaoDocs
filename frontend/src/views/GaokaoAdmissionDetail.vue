@@ -19,6 +19,11 @@
         {{ data.university.name }}
       </h1>
 
+      <!-- 免责声明 -->
+      <div class="disclaimer">
+        ⚠️ 所有录取数据由程序自动抓取自各高校招生官网，仅供参考。填报志愿前请务必以官方最新公布的招生章程为准。
+      </div>
+
       <!-- 元信息 -->
       <div class="page-meta">
         <span class="meta-chip">📍 {{ data.university.province }}{{ data.university.city ? ' · ' + data.university.city : '' }}</span>
@@ -45,31 +50,27 @@
         </div>
       </div>
 
-      <!-- 录取数据 -->
+      <!-- 录取数据（每个专业组独立表格，列宽统一） -->
       <div class="data-card">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th class="col-major">专业</th>
-              <th class="col-num">计划</th>
-              <th class="col-num">最高分</th>
-              <th class="col-num">最低分</th>
-              <th class="col-num">平均分</th>
-              <th class="col-num col-rank">最低排位</th>
-            </tr>
-          </thead>
-          <tbody>
-            <template v-for="g in data.groups" :key="g.groupName">
-              <!-- 专业组标题行 -->
-              <tr class="group-header-row" @click="toggleGroup(g.groupName)">
-                <td colspan="6">
-                  <span :class="['group-toggle', { open: !collapsedGroups.has(g.groupName) }]">▾</span>
-                  {{ g.groupName }}
-                  <span class="group-meta">{{ g.majors.length }} 个专业</span>
-                </td>
-              </tr>
-              <!-- 专业数据行 -->
-              <template v-if="!collapsedGroups.has(g.groupName)">
+        <div v-for="g in data.groups" :key="g.groupName" class="group-card">
+          <div class="group-header" @click="toggleGroup(g.groupName)">
+            <span :class="['group-toggle', { open: !collapsedGroups.has(g.groupName) }]">▾</span>
+            <span class="group-name">{{ g.groupName }}</span>
+            <span class="group-meta">{{ g.majors.length }} 个专业</span>
+          </div>
+          <div v-if="!collapsedGroups.has(g.groupName)" class="group-body">
+            <table class="data-table" v-if="g.majors.length > 0">
+              <thead>
+                <tr>
+                  <th class="col-major">专业</th>
+                  <th class="col-num">计划</th>
+                  <th class="col-num">最高分</th>
+                  <th class="col-num">最低分</th>
+                  <th class="col-num">平均分</th>
+                  <th class="col-num col-rank">最低排位</th>
+                </tr>
+              </thead>
+              <tbody>
                 <tr v-for="m in g.majors" :key="m.majorName">
                   <td class="col-major">{{ m.majorName }}</td>
                   <td class="col-num">{{ m.enrollmentCount || '-' }}</td>
@@ -78,11 +79,17 @@
                   <td class="col-num">{{ m.avgScore || '-' }}</td>
                   <td class="col-num col-rank">{{ m.minRank || '-' }}</td>
                 </tr>
-              </template>
-            </template>
-          </tbody>
-        </table>
+              </tbody>
+            </table>
+            <div v-else class="empty-inline">暂无专业数据</div>
+          </div>
+        </div>
         <div v-if="data.groups.length === 0" class="empty-inline">暂无录取数据</div>
+      </div>
+
+      <!-- 数据来源 -->
+      <div class="source-footer" v-if="data.sourceUrl">
+        数据来源：<a :href="data.sourceUrl" target="_blank" rel="noopener">{{ data.sourceUrl }}</a>
       </div>
     </template>
   </div>
@@ -203,6 +210,31 @@ watch(
   font-weight: 600;
 }
 
+/* 免责声明 */
+.disclaimer {
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  background: color-mix(in srgb, var(--accent-color, #1e6bb8) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-color, #1e6bb8) 20%, transparent);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+  line-height: 1.6;
+}
+
+/* 数据来源 */
+.source-footer {
+  margin-top: 16px;
+  padding: 8px 0;
+  font-size: 12px;
+  color: var(--text-secondary, #999);
+  text-align: center;
+}
+.source-footer a {
+  color: var(--accent-color, #1e6bb8);
+  word-break: break-all;
+}
+
 .summary-bar {
   display: flex;
   gap: 16px;
@@ -234,26 +266,34 @@ watch(
   overflow: hidden;
 }
 
-/* 专业组标题行（在表格内） */
-.group-header-row td {
-  padding: 10px 12px;
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--text-primary, #333);
-  background: var(--body-bg, #f5f5f5);
+/* 专业组卡片（独立表格，间距分开） */
+.group-card {
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+}
+.group-card:last-child {
+  border-bottom: none;
+}
+.group-card + .group-card {
+  margin-top: 12px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border-color, #eee);
+}
+
+/* 专业组标题 */
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
   cursor: pointer;
   user-select: none;
-  border-bottom: 1px solid var(--border-color, #eee);
-}
-.group-header-row:hover td {
-  background: var(--border-color, #e8e8e8);
 }
 .group-toggle {
   font-size: 12px;
   color: var(--text-secondary, #999);
   transition: transform 0.2s;
-  display: inline-block;
-  margin-right: 6px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 .group-toggle.open {
   transform: rotate(0deg);
@@ -261,16 +301,21 @@ watch(
 .group-toggle:not(.open) {
   transform: rotate(-90deg);
 }
+.group-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #333);
+}
 .group-meta {
   font-size: 12px;
   color: var(--text-secondary, #999);
-  margin-left: 8px;
-  font-weight: 400;
 }
 
-/* 表格 */
+/* 表格 — table-layout:fixed 保证跨表格列宽一致 */
 .data-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 13px;
 }
@@ -293,22 +338,25 @@ watch(
 .data-table tbody tr:hover {
   background: var(--body-bg, #f0f0f0);
 }
-.data-table tbody tr:not(.group-header-row):nth-child(even) {
+.data-table tbody tr:nth-child(even) {
   background: var(--body-bg, #f5f5f5);
 }
 .data-table tbody tr:last-child td {
   border-bottom: none;
 }
+
+/* 列宽 — 百分比值，所有表格共享同一比例 */
 .col-major {
-  min-width: 160px;
+  width: 36%;
 }
 .col-num {
   text-align: right;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  width: 12%;
 }
 .col-rank {
-  width: 80px;
+  width: 13%;
 }
 
 .empty-inline {

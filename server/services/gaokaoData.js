@@ -135,6 +135,14 @@ export function getAdmissionByCode(universityCode, year) {
   if (uniInfo.is_211) tags.push('211')
   if (uniInfo.is_double_first_class) tags.push('双一流')
 
+  // 获取数据来源 URL（取第一个有效的官网链接）
+  const sourceUrlRow = db.prepare(`
+    SELECT source_url FROM university_admission_data
+    WHERE university_code = ? AND source_url IS NOT NULL
+      AND source_url LIKE 'http%'
+    LIMIT 1
+  `).get(universityCode)
+
   return {
     university: {
       name: uniInfo.university_name,
@@ -147,6 +155,7 @@ export function getAdmissionByCode(universityCode, year) {
     activeYear,
     admissionProvince: rows.length > 0 ? rows[0].province : null,
     subjectType: rows.length > 0 ? rows[0].subject_type : null,
+    sourceUrl: sourceUrlRow ? sourceUrlRow.source_url : null,
     groups
   }
 }
