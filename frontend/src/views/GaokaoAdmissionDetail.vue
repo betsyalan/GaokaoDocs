@@ -320,14 +320,14 @@ watch(
   font-size: 13px;
 }
 .data-table thead {
-  background: var(--body-bg, #f5f5f5);
+  background: color-mix(in srgb, var(--accent-color, #1e6bb8) 8%, transparent);
 }
 .data-table th {
   padding: 8px 12px;
   text-align: left;
   font-weight: 600;
-  color: var(--text-primary, #333);
-  border-bottom: 1px solid var(--border-color, #eee);
+  color: var(--accent-color, #1e6bb8);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent-color, #1e6bb8) 20%, transparent);
   white-space: nowrap;
 }
 .data-table td {
