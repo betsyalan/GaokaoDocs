@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <h1 class="page-title">文档概览</h1>
+    <h1 class="page-title">报考总览</h1>
 
     <!-- 加载中 -->
     <div v-if="loading" class="loading">加载中...</div>
