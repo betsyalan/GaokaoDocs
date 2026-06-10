@@ -112,16 +112,16 @@ export async function buildIndex() {
               WHERE university_code = ? AND major_name IS NOT NULL AND major_name != '')
       `).get(u.university_code)
       const extra = majors?.names || ''
-      const content = [u.province, u.city, extra].filter(Boolean).join(' ')
+      const content = [u.university_name, u.province, u.city, extra].filter(Boolean).join(' ')
       insert.run(`gaokao:uni:${u.university_code}`, u.university_name, segmentChinese(content))
       count++
-      // 各专业独立条目（不带大学名，避免干扰大学名搜索）
+      // 各专业独立条目（title/name 需分词，否则 FTS5 无法匹配单个中文字符）
       const majorRows = gDb.prepare(`
         SELECT DISTINCT major_name FROM university_admission_data
         WHERE university_code = ? AND major_name IS NOT NULL AND major_name != ''
       `).all(u.university_code)
       for (const mr of majorRows) {
-        insert.run(`gaokao:maj:${u.university_code}:${mr.major_name}`, mr.major_name, '')
+        insert.run(`gaokao:maj:${u.university_code}:${mr.major_name}`, mr.major_name, segmentChinese(mr.major_name))
         count++
       }
     }
