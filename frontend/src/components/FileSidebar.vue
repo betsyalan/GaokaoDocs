@@ -58,57 +58,57 @@
       </div>
     </nav>
 
-      <!-- 高考数据分类（数据库驱动） -->
-      <nav class="sidebar-files" v-if="universitiesByProvince.length > 0">
-        <div class="sidebar-section-divider">高考数据</div>
+    <!-- 高考数据分类（数据库驱动） -->
+    <nav class="sidebar-files" v-if="universitiesByProvince.length > 0">
+      <div class="sidebar-section-divider">高考数据</div>
 
-        <!-- 历年录取分 -->
-        <div class="sidebar-cat-group">
-          <div class="sidebar-cat-header" @click="toggleCat('admission')">
-            <component :is="ScrollText" :size="14" stroke-width="1.5" />
-            <span class="sidebar-cat-label">历年录取分</span>
-            <span class="sidebar-cat-count">
-              {{ universitiesByProvince.reduce((s, p) => s + p.universities.length, 0) }}
-            </span>
-            <span :class="['sidebar-cat-toggle', { open: !collapsedCats.has('admission') }]">▾</span>
-          </div>
-          <div v-if="!collapsedCats.has('admission')">
-            <!-- 按省份分组 -->
-            <div v-for="prov in universitiesByProvince" :key="prov.province" class="sidebar-cat-group">
-              <div class="sidebar-province-header" @click.stop="toggleProvince(prov.province)">
-                <span class="province-name">{{ prov.province }}</span>
-                <span class="sidebar-cat-count">{{ prov.universities.length }}</span>
-                <span :class="['sidebar-cat-toggle', { open: !collapsedProvince.has(prov.province) }]">▾</span>
-              </div>
-              <div v-if="!collapsedProvince.has(prov.province)">
-                <router-link
-                  v-for="u in prov.universities" :key="u.code"
-                  :to="`/gaokao/admission/${u.code}`"
-                  :class="['file-item', { active: activeUniCode === u.code }]"
-                  @click="onFileClick"
-                >
-                  <span class="file-icon">{{ '' }}</span>
-                  <span class="file-name" :title="u.name">{{ u.name }}</span>
-                </router-link>
-              </div>
+      <!-- 历年录取分 -->
+      <div class="sidebar-cat-group">
+        <div class="sidebar-cat-header" @click="toggleCat('admission')">
+          <component :is="ScrollText" :size="14" stroke-width="1.5" />
+          <span class="sidebar-cat-label">历年录取分</span>
+          <span class="sidebar-cat-count">
+            {{ universitiesByProvince.reduce((s, p) => s + p.universities.length, 0) }}
+          </span>
+          <span :class="['sidebar-cat-toggle', { open: !collapsedCats.has('admission') }]">▾</span>
+        </div>
+        <div v-if="!collapsedCats.has('admission')">
+          <!-- 按省份分组 -->
+          <div v-for="prov in universitiesByProvince" :key="prov.province" class="sidebar-cat-group">
+            <div class="sidebar-province-header" @click.stop="toggleProvince(prov.province)">
+              <span class="province-name">{{ prov.province }}</span>
+              <span class="sidebar-cat-count">{{ prov.universities.length }}</span>
+              <span :class="['sidebar-cat-toggle', { open: !collapsedProvince.has(prov.province) }]">▾</span>
+            </div>
+            <div v-if="!collapsedProvince.has(prov.province)">
+              <router-link
+                v-for="u in prov.universities" :key="u.code"
+                :to="`/gaokao/admission/${u.code}`"
+                :class="['file-item', { active: activeUniCode === u.code }]"
+                @click="onFileClick"
+              >
+                <span class="file-icon">{{ '' }}</span>
+                <span class="file-name" :title="u.name">{{ u.name }}</span>
+              </router-link>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- 一分一段表 -->
-        <div class="sidebar-cat-group">
-          <router-link
-            to="/gaokao/distribution"
-            :class="['file-item', { active: $route.path === '/gaokao/distribution' }]"
-            @click="onFileClick"
-          >
-            <span class="file-icon">
-              <component :is="BarChart4" :size="16" stroke-width="1.5" />
-            </span>
-            <span class="file-name">一分一段表</span>
-          </router-link>
-        </div>
-      </nav>
+      <!-- 一分一段表 -->
+      <div class="sidebar-cat-group">
+        <router-link
+          to="/gaokao/distribution"
+          :class="['file-item', { active: $route.path === '/gaokao/distribution' }]"
+          @click="onFileClick"
+        >
+          <span class="file-icon">
+            <component :is="BarChart4" :size="16" stroke-width="1.5" />
+          </span>
+          <span class="file-name">一分一段表</span>
+        </router-link>
+      </div>
+    </nav>
   </aside>
 </template>
 
@@ -141,7 +141,6 @@ const types = [
 
 // 历年录取分的大学列表（按省份分组）
 const universitiesByProvince = ref([])
-const uniLoading = ref(false)
 const collapsedProvince = ref(new Set())
 
 // 当前激活的大学（高亮用）
@@ -200,15 +199,12 @@ async function loadFiles() {
 }
 
 async function loadUniversities() {
-  uniLoading.value = true
   try {
     const data = await api.getGaokaoUniversities()
     universitiesByProvince.value = data.provinces || []
   } catch {
     // 静默失败，分类直接不展示
     universitiesByProvince.value = []
-  } finally {
-    uniLoading.value = false
   }
 }
 
