@@ -8,7 +8,7 @@
 
     <!-- 空（大学不存在） -->
     <div v-else-if="!data" class="empty-state">
-      <div class="icon">🏫</div>
+      <component :is="GraduationCap" :size="48" stroke-width="1.5" style="color:var(--text-secondary,#ccc);margin-bottom:12px" />
       <p>未找到该大学数据</p>
     </div>
 
@@ -29,8 +29,8 @@
 
       <!-- 元信息 -->
       <div class="page-meta">
-        <span class="meta-chip">📍 {{ data.university.province }}{{ data.university.city ? ' · ' + data.university.city : '' }}</span>
-        <span class="meta-chip">📚 {{ data.admissionProvince }} · {{ data.subjectType }}</span>
+        <span class="meta-chip"><component :is="MapPin" :size="14" stroke-width="1.5" style="vertical-align:middle;margin-right:4px" /> {{ data.university.province }}{{ data.university.city ? ' · ' + data.university.city : '' }}</span>
+        <span class="meta-chip"><component :is="BookOpen" :size="14" stroke-width="1.5" style="vertical-align:middle;margin-right:4px" /> {{ data.admissionProvince }} · {{ data.subjectType }}</span>
         <span v-for="tag in data.university.tags" :key="tag" class="meta-chip tag-chip">{{ tag }}</span>
       </div>
 
@@ -98,7 +98,7 @@
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { api } from '@/api'
-import { GraduationCap } from 'lucide-vue-next'
+import { GraduationCap, MapPin, BookOpen } from 'lucide-vue-next'
 
 const route = useRoute()
 const loading = ref(true)

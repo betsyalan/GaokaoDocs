@@ -14,9 +14,9 @@
 
       <!-- 元信息 -->
       <div class="page-meta" v-if="meta">
-        <span class="meta-chip">📍 {{ meta.province }}</span>
+        <span class="meta-chip"><component :is="MapPin" :size="14" stroke-width="1.5" style="vertical-align:middle;margin-right:4px" /> {{ meta.province }}</span>
         <span class="meta-chip">📅 {{ meta.year }}</span>
-        <span class="meta-chip">📚 {{ meta.subjectType }}</span>
+        <span class="meta-chip"><component :is="BookOpen" :size="14" stroke-width="1.5" style="vertical-align:middle;margin-right:4px" /> {{ meta.subjectType }}</span>
       </div>
 
       <!-- 数据表格 -->
@@ -58,7 +58,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { api } from '@/api'
-import { BarChart4 } from 'lucide-vue-next'
+import { BarChart4, MapPin, BookOpen } from 'lucide-vue-next'
 
 const loading = ref(true)
 const error = ref(null)
