@@ -4,6 +4,7 @@ import path from 'path'
 
 const DOCS_DIR = path.resolve('./docs')
 const DB_PATH = path.join(DOCS_DIR, 'search.db')
+const GAOKAO_DB_PATH = path.resolve('./data/gaokao_scores.db')
 
 let db = null
 
@@ -94,7 +95,47 @@ export async function buildIndex() {
     count++
   }
 
-  console.log(`[Search] Indexed ${count} files`)
+  // 索引高考数据库中的大学和专业名称
+  try {
+    const gDb = new DatabaseSync(GAOKAO_DB_PATH)
+
+    // 大学名称（附带所有专业名作为内容）
+    const unis = gDb.prepare(`
+      SELECT DISTINCT u.university_code, u.university_name, u.province, u.city
+      FROM universities_info u
+      WHERE u.university_code IN (SELECT DISTINCT university_code FROM university_admission_data)
+    `).all()
+    for (const u of unis) {
+      const majors = gDb.prepare(`
+        SELECT GROUP_CONCAT(major_name, ' ') as names
+        FROM (SELECT DISTINCT major_name FROM university_admission_data
+              WHERE university_code = ? AND major_name IS NOT NULL AND major_name != '')
+      `).get(u.university_code)
+      const extra = majors?.names || ''
+      const content = [u.province, u.city, extra].filter(Boolean).join(' ')
+      insert.run(`gaokao:uni:${u.university_code}`, u.university_name, segmentChinese(content))
+      count++
+    }
+
+    // 专业名称（去重，附带大学名）
+    const majors = gDb.prepare(`
+      SELECT DISTINCT a.university_code, a.major_name, u.university_name
+      FROM university_admission_data a
+      LEFT JOIN universities_info u ON a.university_code = u.university_code
+      WHERE a.major_name IS NOT NULL AND a.major_name != ''
+    `).all()
+    for (const m of majors) {
+      const content = m.university_name || ''
+      insert.run(`gaokao:maj:${m.university_code}:${m.major_name}`, m.major_name, segmentChinese(content))
+      count++
+    }
+
+    gDb.close()
+  } catch (err) {
+    console.error('[Search] Failed to index gaokao data:', err.message)
+  }
+
+  console.log(`[Search] Indexed ${count} entries`)
 }
 
 /**
@@ -112,7 +153,7 @@ export function search(query) {
     const stmt = db.prepare(`
       SELECT file, title, snippet(docs_index, 2, '<b>', '</b>', '...', 64) as snippet
       FROM docs_index WHERE docs_index MATCH ?
-      ORDER BY rank
+      ORDER BY bm25(docs_index, 0, 10.0, 1.0)
       LIMIT 20
     `)
     return stmt.all(segmentedQuery)
