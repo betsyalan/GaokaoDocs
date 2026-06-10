@@ -32,6 +32,11 @@ export const api = {
   // 统计
   getStats: () => request('/stats'),
 
+  // 高考数据
+  getGaokaoUniversities: () => request('/gaokao/universities'),
+  getGaokaoAdmission: (code) => request(`/gaokao/admission/${code}`),
+  getGaokaoDistribution: () => request('/gaokao/distribution'),
+
   // 管理（需要 token）
   login: (password) => request('/admin/login', {
     method: 'POST',
