@@ -153,7 +153,7 @@ export function search(query) {
     const stmt = db.prepare(`
       SELECT file, title, snippet(docs_index, 2, '<b>', '</b>', '...', 64) as snippet
       FROM docs_index WHERE docs_index MATCH ?
-      ORDER BY bm25(docs_index, 0, 10.0, 1.0)
+      ORDER BY bm25(docs_index, 0, 3.0, 1.0)
       LIMIT 20
     `)
     return stmt.all(segmentedQuery)

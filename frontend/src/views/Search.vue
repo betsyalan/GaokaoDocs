@@ -24,10 +24,11 @@
     <!-- 搜索结果 -->
     <div v-else class="results">
       <div v-for="r in results" :key="r.file" class="result-item">
-        <router-link :to="`/file/${r.file}`" class="result-title">
+        <router-link :to="resultLink(r)" class="result-title">
           {{ r.title || r.file }}
         </router-link>
-        <div class="result-snippet" v-html="r.snippet"></div>
+        <span class="result-type">{{ resultType(r) }}</span>
+        <div class="result-snippet" v-if="r.snippet" v-html="r.snippet"></div>
       </div>
     </div>
   </div>
@@ -41,6 +42,29 @@ const query = ref('')
 const results = ref([])
 const loading = ref(false)
 let debounceTimer = null
+
+/**
+ * 返回结果类型标签
+ */
+function resultType(r) {
+  if (r.file.startsWith('gaokao:uni:')) return '大学'
+  if (r.file.startsWith('gaokao:maj:')) return '专业'
+  return r.file.split('.').pop().toUpperCase()
+}
+
+/**
+ * 根据结果类型返回正确的导航链接
+ * gaokao:uni:code → /gaokao/admission/code
+ * gaokao:maj:code:major → /gaokao/admission/code
+ * 普通文件 → /file/path
+ */
+function resultLink(r) {
+  if (r.file.startsWith('gaokao:uni:') || r.file.startsWith('gaokao:maj:')) {
+    const code = r.file.split(':')[2]
+    return `/gaokao/admission/${code}`
+  }
+  return `/file/${r.file}`
+}
 
 function onSearch() {
   clearTimeout(debounceTimer)
@@ -96,4 +120,16 @@ function onSearch() {
   line-height: 1.6;
 }
 .result-snippet :deep(b) { color: #e94560; }
+.result-type {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--accent-color, #1e6bb8) 10%, transparent);
+  color: var(--accent-color, #1e6bb8);
+  border: 1px solid color-mix(in srgb, var(--accent-color, #1e6bb8) 20%, transparent);
+  vertical-align: middle;
+}
 </style>
