@@ -62,17 +62,17 @@ export function statsMiddleware(req, res, next) {
   if (req.method === 'GET' && req.path.startsWith('/api/file/')) {
     // 解码 URL 编码的文件名（%E5%8C%97 → 北）
     const filePath = decodeURIComponent(req.path.replace('/api/file/', ''))
-    const hourKey = new Date().toISOString().slice(0, 13)  // "2026-06-10T14"
+    const today = new Date().toISOString().split('T')[0]
 
     statsCache.totalViews++
     statsCache.views[filePath] = (statsCache.views[filePath] || 0) + 1
-    statsCache.daily[hourKey] = (statsCache.daily[hourKey] || 0) + 1
+    statsCache.daily[today] = (statsCache.daily[today] || 0) + 1
     dirty = true
 
-    // 保留最近 48 小时
+    // 保留最近 31 天
     const keys = Object.keys(statsCache.daily).sort()
-    if (keys.length > 48) {
-      const toDelete = keys.slice(0, keys.length - 48)
+    if (keys.length > 31) {
+      const toDelete = keys.slice(0, keys.length - 31)
       toDelete.forEach(k => delete statsCache.daily[k])
     }
   }
