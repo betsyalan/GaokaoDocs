@@ -2,15 +2,6 @@
   <div class="container">
     <h1 class="page-title">文档概览</h1>
 
-    <!-- 文件类型筛选（细类） -->
-    <div class="type-bar">
-      <button
-        v-for="t in types" :key="t.key"
-        :class="['type-btn', { active: activeType === t.key }]"
-        @click="activeType = t.key; loadFiles()"
-      >{{ t.label }}</button>
-    </div>
-
     <!-- 加载中 -->
     <div v-if="loading" class="loading">加载中...</div>
 
@@ -111,17 +102,8 @@ import { BookOpen, GraduationCap, Target, BarChart3, FileText, Globe, ScrollText
 const files = ref([])
 const loading = ref(true)
 const error = ref(null)
-const activeType = ref('')
 const activeCat = ref('')
 const collapsedCats = ref(new Set())
-
-const types = [
-  { key: '', label: '全部类型' },
-  { key: 'md', label: 'Markdown' },
-  { key: 'html', label: 'HTML' },
-  { key: 'pdf', label: 'PDF' },
-  { key: 'xlsx', label: 'Excel' },
-]
 
 // 分类定义，使用 Lucide 图标组件
 const categoryDefs = {
@@ -136,9 +118,9 @@ const categoryDefs = {
 }
 
 // 分类展示顺序
-const catOrder = [categoryDefs.major, categoryDefs.university, categoryDefs.guide,
-                  categoryDefs.data, categoryDefs.reference,
-                  categoryDefs.admission, categoryDefs.distribution,
+const catOrder = [categoryDefs.major, categoryDefs.admission, categoryDefs.university,
+                  categoryDefs.guide, categoryDefs.data,
+                  categoryDefs.distribution, categoryDefs.reference,
                   categoryDefs.page]
 
 // 历年录取分的大学列表（按省份分组）
@@ -205,7 +187,7 @@ async function loadFiles() {
   loading.value = true
   error.value = null
   try {
-    const data = await api.getFiles(activeType.value)
+    const data = await api.getFiles('')
     files.value = data.files || []
   } catch {
     error.value = '加载文件列表失败'
@@ -230,20 +212,6 @@ async function loadUniversities() {
 </script>
 
 <style scoped>
-/* 类型筛选 */
-.type-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-.type-btn {
-  padding: 6px 16px;
-  border: 1px solid var(--border-color, #ddd);
-  border-radius: 20px;
-  background: var(--card-bg, #fff);
-  cursor: pointer;
-  font-size: 13px;
-  transition: all 0.2s, background 0.3s, border-color 0.3s;
-}
-.type-btn:hover { border-color: var(--accent-color, #1a73e8); color: var(--accent-color, #1a73e8); }
-.type-btn.active { background: var(--accent-color, #1a73e8); color: #fff; border-color: var(--accent-color, #1a73e8); }
-
 /* 分类标签栏 */
 .cat-bar {
   display: flex;
