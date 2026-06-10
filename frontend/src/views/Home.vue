@@ -47,12 +47,56 @@
         <div class="cat-header" @click="toggleCat(ci.key)">
           <component :is="ci.icon" :size="20" stroke-width="1.5" class="cat-header-icon" />
           <span class="cat-header-label">{{ ci.label }}</span>
-          <span class="cat-header-count">{{ catCounts[ci.key] }} 个文件</span>
+          <span class="cat-header-count">{{ ci.isData ? '' : catCounts[ci.key] + ' 个文件' }}</span>
           <span :class="['cat-toggle', { open: !collapsedCats.has(ci.key) }]">▾</span>
         </div>
-        <div v-if="!collapsedCats.has(ci.key)" class="cat-body">
-          <FileCard v-for="f in groupedFiles[ci.key]" :key="f.path" :file="f" />
-        </div>
+
+        <!-- 文件分类 -->
+        <template v-if="!ci.isData">
+          <div v-if="!collapsedCats.has(ci.key)" class="cat-body">
+            <FileCard v-for="f in groupedFiles[ci.key]" :key="f.path" :file="f" />
+          </div>
+        </template>
+
+        <!-- 历年录取分 -->
+        <template v-else-if="ci.key === 'admission'">
+          <div v-if="!collapsedCats.has(ci.key)" class="cat-body">
+            <div v-for="prov in universitiesByProvince" :key="prov.province" class="province-group">
+              <div class="province-header" @click.stop="toggleProvince(prov.province)">
+                <span class="province-label">{{ prov.province }}</span>
+                <span class="province-count">{{ prov.universities.length }} 所</span>
+                <span :class="['cat-toggle', { open: !collapsedProvince.has(prov.province) }]">▾</span>
+              </div>
+              <div v-if="!collapsedProvince.has(prov.province)" class="uni-list">
+                <router-link
+                  v-for="u in prov.universities" :key="u.code"
+                  :to="`/gaokao/admission/${u.code}`"
+                  class="uni-card"
+                >
+                  <span class="uni-icon"><component :is="GraduationCap" :size="20" stroke-width="1.5" /></span>
+                  <span class="uni-name">{{ u.name }}</span>
+                  <span class="uni-tags">
+                    <span v-for="tag in u.tags" :key="tag" class="tag-badge">{{ tag }}</span>
+                  </span>
+                  <span class="uni-arrow">→</span>
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- 一分一段表 -->
+        <template v-else-if="ci.key === 'distribution'">
+          <div v-if="!collapsedCats.has(ci.key)" class="cat-body">
+            <router-link to="/gaokao/distribution" class="dist-card">
+              <span class="dist-icon"><component :is="BarChart4" :size="28" stroke-width="1.5" /></span>
+              <div class="dist-info">
+                <div class="dist-title">广东省 2025 物理类一分一段表</div>
+                <div class="dist-meta">597 条记录 · 点击查看 →</div>
+              </div>
+            </router-link>
+          </div>
+        </template>
       </div>
     </template>
   </div>
@@ -62,7 +106,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { api } from '@/api'
 import FileCard from '@/components/FileCard.vue'
-import { BookOpen, GraduationCap, Target, BarChart3, FileText, Globe } from 'lucide-vue-next'
+import { BookOpen, GraduationCap, Target, BarChart3, FileText, Globe, ScrollText, BarChart4 } from 'lucide-vue-next'
 
 const files = ref([])
 const loading = ref(true)
@@ -86,12 +130,26 @@ const categoryDefs = {
   guide:      { key: 'guide',      icon: Target,        label: '报考指南', color: '#c94f2b' },
   data:       { key: 'data',       icon: BarChart3,     label: '志愿数据', color: '#7c4d9e' },
   reference:  { key: 'reference',  icon: FileText,      label: '参考资料', color: '#8b7355' },
+  admission:  { key: 'admission',  icon: ScrollText,    label: '历年录取分', color: '#2563eb', isData: true },
+  distribution: { key: 'distribution', icon: BarChart4, label: '一分一段表', color: '#0891b2', isData: true },
   page:       { key: 'page',       icon: Globe,         label: '其他页面', color: '#6b7280' },
 }
 
 // 分类展示顺序
 const catOrder = [categoryDefs.major, categoryDefs.university, categoryDefs.guide,
-                  categoryDefs.data, categoryDefs.reference, categoryDefs.page]
+                  categoryDefs.data, categoryDefs.reference,
+                  categoryDefs.admission, categoryDefs.distribution,
+                  categoryDefs.page]
+
+// 历年录取分的大学列表（按省份分组）
+const universitiesByProvince = ref([])
+const collapsedProvince = ref(new Set())
+
+function toggleProvince(province) {
+  const s = new Set(collapsedProvince.value)
+  if (s.has(province)) s.delete(province); else s.add(province)
+  collapsedProvince.value = s
+}
 
 // 按分类分组文件
 const groupedFiles = computed(() => {
@@ -104,20 +162,28 @@ const groupedFiles = computed(() => {
   return groups
 })
 
-// 各类别文件数
+// 各类别文件数（数据分类使用大学总数）
 const catCounts = computed(() => {
   const counts = {}
   for (const [cat, list] of Object.entries(groupedFiles.value)) {
     counts[cat] = list.length
   }
+  counts.admission = universitiesByProvince.value.reduce((s, p) => s + p.universities.length, 0)
+  counts.distribution = 1  // 一条入口
   return counts
 })
 
-// 当前可见的分类（按 catOrder 排序，filter 只显示有文件的或全部模式）
+// 当前可见的分类（数据分类始终显示）
 const visibleCats = computed(() => {
-  return activeCat.value
-    ? catOrder.filter(ci => ci.key === activeCat.value && catCounts.value[ci.key])
-    : catOrder.filter(ci => catCounts.value[ci.key])
+  const showAll = !activeCat.value
+  return catOrder.filter(ci => {
+    if (ci.isData) {
+      return showAll || activeCat.value === ci.key
+    }
+    return showAll
+      ? catCounts.value[ci.key] > 0
+      : activeCat.value === ci.key && catCounts.value[ci.key] > 0
+  })
 })
 
 // 收起/展开分类
@@ -148,7 +214,19 @@ async function loadFiles() {
   }
 }
 
-onMounted(loadFiles)
+onMounted(() => {
+  loadFiles()
+  loadUniversities()
+})
+
+async function loadUniversities() {
+  try {
+    const data = await api.getGaokaoUniversities()
+    universitiesByProvince.value = data.provinces || []
+  } catch {
+    universitiesByProvince.value = []
+  }
+}
 </script>
 
 <style scoped>
@@ -195,6 +273,8 @@ onMounted(loadFiles)
 }
 .cat-btn.active {
   color: #fff !important;
+  background: var(--accent-color, #666) !important;
+  border-color: var(--accent-color, #666) !important;
 }
 .cat-count {
   font-size: 11px;
@@ -248,5 +328,120 @@ onMounted(loadFiles)
 }
 .cat-body {
   padding-left: 4px;
+}
+
+/* ========== 省份分组 ========== */
+.province-group {
+  margin-bottom: 4px;
+}
+.province-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  color: var(--text-secondary, #666);
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+.province-header:hover {
+  background: var(--body-bg, #f5f5f5);
+}
+.province-label {
+  font-weight: 600;
+  color: var(--text-primary, #333);
+}
+.province-count {
+  font-size: 11px;
+  color: var(--text-secondary, #999);
+  margin-left: auto;
+}
+
+/* ========== 大学卡片 ========== */
+.uni-list {
+  padding-left: 12px;
+}
+.uni-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 6px;
+  background: var(--card-bg, #fff);
+  border-radius: 8px;
+  box-shadow: var(--card-shadow, 0 1px 3px rgba(0,0,0,0.06));
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.2s;
+}
+.uni-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.uni-icon {
+  display: flex;
+  align-items: center;
+  color: var(--accent-color, #1e6bb8);
+  flex-shrink: 0;
+}
+.uni-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary, #333);
+}
+.uni-tags {
+  display: flex;
+  gap: 4px;
+}
+.tag-badge {
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  background: color-mix(in srgb, var(--accent-color, #1e6bb8) 10%, transparent);
+  color: var(--accent-color, #1e6bb8);
+  border: 1px solid color-mix(in srgb, var(--accent-color, #1e6bb8) 25%, transparent);
+}
+.uni-arrow {
+  font-size: 14px;
+  color: var(--text-secondary, #bbb);
+  flex-shrink: 0;
+}
+
+/* ========== 一分一段表入口卡片 ========== */
+.dist-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: var(--card-bg, #fff);
+  border-radius: 8px;
+  box-shadow: var(--card-shadow, 0 1px 3px rgba(0,0,0,0.06));
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.2s;
+}
+.dist-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.dist-icon {
+  display: flex;
+  align-items: center;
+  color: var(--accent-color, #0891b2);
+  flex-shrink: 0;
+}
+.dist-info {
+  flex: 1;
+}
+.dist-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #333);
+}
+.dist-meta {
+  font-size: 13px;
+  color: var(--text-secondary, #999);
+  margin-top: 4px;
 }
 </style>
