@@ -29,84 +29,81 @@
       <button class="retry-btn" @click="loadFiles">重试</button>
     </div>
 
-    <!-- 空状态 -->
-    <div v-else-if="files.length === 0" class="sidebar-empty">
+    <!-- 空状态：无文件且无数据时显示 -->
+    <div v-else-if="files.length === 0 && universitiesByProvince.length === 0" class="sidebar-empty">
       <span class="empty-icon">📂</span>
       <p>暂无文件</p>
     </div>
 
-    <!-- 文件列表（按分类分组） -->
-    <nav v-else class="sidebar-files">
+    <!-- 文件列表 -->
+    <nav class="sidebar-files">
       <div v-for="ci in catOrder" :key="ci.key" class="sidebar-cat-group">
-        <div v-if="groupedFiles[ci.key]?.length" class="sidebar-cat-header" @click="toggleCat(ci.key)">
-          <component :is="ci.icon" :size="14" stroke-width="1.5" />
-          <span class="sidebar-cat-label">{{ ci.label }}</span>
-          <span class="sidebar-cat-count">{{ groupedFiles[ci.key].length }}</span>
-          <span :class="['sidebar-cat-toggle', { open: !collapsedCats.has(ci.key) }]">▾</span>
-        </div>
-        <div v-if="!collapsedCats.has(ci.key)">
-          <router-link
-            v-for="f in groupedFiles[ci.key]" :key="f.path"
-            :to="f.ext === 'xlsx' ? '/volunteer' : `/file/${f.path}`"
-            :class="['file-item', { active: isActiveFile(f.path) }]"
-            @click="onFileClick"
-          >
-            <span class="file-icon"><component :is="iconMap[f.ext] || File" :size="16" stroke-width="1.5" /></span>
-            <span class="file-name" :title="f.name">{{ f.name }}</span>
-          </router-link>
-        </div>
-      </div>
-    </nav>
+        <!-- 文件分类（有文件才显示） -->
+        <template v-if="!ci.isData">
+          <div v-if="groupedFiles[ci.key]?.length" class="sidebar-cat-header" @click="toggleCat(ci.key)">
+            <component :is="ci.icon" :size="14" stroke-width="1.5" />
+            <span class="sidebar-cat-label">{{ ci.label }}</span>
+            <span class="sidebar-cat-count">{{ groupedFiles[ci.key].length }}</span>
+            <span :class="['sidebar-cat-toggle', { open: !collapsedCats.has(ci.key) }]">▾</span>
+          </div>
+          <div v-if="!collapsedCats.has(ci.key)">
+            <router-link
+              v-for="f in groupedFiles[ci.key]" :key="f.path"
+              :to="f.ext === 'xlsx' ? '/volunteer' : `/file/${f.path}`"
+              :class="['file-item', { active: isActiveFile(f.path) }]"
+              @click="onFileClick"
+            >
+              <span class="file-icon"><component :is="iconMap[f.ext] || File" :size="16" stroke-width="1.5" /></span>
+              <span class="file-name" :title="f.name">{{ f.name }}</span>
+            </router-link>
+          </div>
+        </template>
 
-    <!-- 高考数据分类（数据库驱动） -->
-    <nav class="sidebar-files" v-if="universitiesByProvince.length > 0">
-      <div class="sidebar-section-divider">高考数据</div>
-
-      <!-- 历年录取分 -->
-      <div class="sidebar-cat-group">
-        <div class="sidebar-cat-header" @click="toggleCat('admission')">
-          <component :is="ScrollText" :size="14" stroke-width="1.5" />
-          <span class="sidebar-cat-label">历年录取分</span>
-          <span class="sidebar-cat-count">
-            {{ universitiesByProvince.reduce((s, p) => s + p.universities.length, 0) }}
-          </span>
-          <span :class="['sidebar-cat-toggle', { open: !collapsedCats.has('admission') }]">▾</span>
-        </div>
-        <div v-if="!collapsedCats.has('admission')">
-          <!-- 按省份分组 -->
-          <div v-for="prov in universitiesByProvince" :key="prov.province" class="sidebar-cat-group">
-            <div class="sidebar-province-header" @click.stop="toggleProvince(prov.province)">
-              <span class="province-name">{{ prov.province }}</span>
-              <span class="sidebar-cat-count">{{ prov.universities.length }}</span>
-              <span :class="['sidebar-cat-toggle', { open: !collapsedProvince.has(prov.province) }]">▾</span>
-            </div>
-            <div v-if="!collapsedProvince.has(prov.province)">
-              <router-link
-                v-for="u in prov.universities" :key="u.code"
-                :to="`/gaokao/admission/${u.code}`"
-                :class="['file-item', { active: activeUniCode === u.code }]"
-                @click="onFileClick"
-              >
-                <span class="file-icon">{{ '' }}</span>
-                <span class="file-name" :title="u.name">{{ u.name }}</span>
-              </router-link>
+        <!-- 历年录取分（数据库驱动） -->
+        <template v-else-if="ci.key === 'admission' && universitiesByProvince.length > 0">
+          <div class="sidebar-cat-header" @click="toggleCat('admission')">
+            <component :is="ci.icon" :size="14" stroke-width="1.5" />
+            <span class="sidebar-cat-label">{{ ci.label }}</span>
+            <span class="sidebar-cat-count">
+              {{ universitiesByProvince.reduce((s, p) => s + p.universities.length, 0) }}
+            </span>
+            <span :class="['sidebar-cat-toggle', { open: !collapsedCats.has('admission') }]">▾</span>
+          </div>
+          <div v-if="!collapsedCats.has('admission')">
+            <div v-for="prov in universitiesByProvince" :key="prov.province" class="sidebar-cat-group">
+              <div class="sidebar-province-header" @click.stop="toggleProvince(prov.province)">
+                <span class="province-name">{{ prov.province }}</span>
+                <span class="sidebar-cat-count">{{ prov.universities.length }}</span>
+                <span :class="['sidebar-cat-toggle', { open: !collapsedProvince.has(prov.province) }]">▾</span>
+              </div>
+              <div v-if="!collapsedProvince.has(prov.province)">
+                <router-link
+                  v-for="u in prov.universities" :key="u.code"
+                  :to="`/gaokao/admission/${u.code}`"
+                  :class="['file-item', { active: activeUniCode === u.code }]"
+                  @click="onFileClick"
+                >
+                  <span class="file-icon">{{ '' }}</span>
+                  <span class="file-name" :title="u.name">{{ u.name }}</span>
+                </router-link>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </template>
 
-      <!-- 一分一段表 -->
-      <div class="sidebar-cat-group">
-        <router-link
-          to="/gaokao/distribution"
-          :class="['file-item', { active: $route.path === '/gaokao/distribution' }]"
-          @click="onFileClick"
-        >
-          <span class="file-icon">
-            <component :is="BarChart4" :size="16" stroke-width="1.5" />
-          </span>
-          <span class="file-name">一分一段表</span>
-        </router-link>
+        <!-- 一分一段表（数据库驱动） -->
+        <template v-else-if="ci.key === 'distribution'">
+          <router-link
+            to="/gaokao/distribution"
+            :class="['file-item', { active: $route.path === '/gaokao/distribution' }]"
+            @click="onFileClick"
+          >
+            <span class="file-icon">
+              <component :is="ci.icon" :size="16" stroke-width="1.5" />
+            </span>
+            <span class="file-name">{{ ci.label }}</span>
+          </router-link>
+        </template>
       </div>
     </nav>
   </aside>
@@ -153,6 +150,8 @@ const catOrder = [
   { key: 'guide',      icon: Target,        label: '报考指南' },
   { key: 'data',       icon: BarChart3,     label: '志愿数据' },
   { key: 'reference',  icon: FileText,      label: '参考资料' },
+  { key: 'admission',  icon: ScrollText,    label: '历年录取分', isData: true },
+  { key: 'distribution', icon: BarChart4,   label: '一分一段表', isData: true },
   { key: 'page',       icon: Globe,         label: '其他页面' },
 ]
 
@@ -420,18 +419,6 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* 数据分类隔断 */
-.sidebar-section-divider {
-  padding: 16px 16px 4px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--sidebar-text-secondary, rgba(255,255,255,0.25));
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  border-top: 1px solid var(--sidebar-border, rgba(255,255,255,0.06));
-  margin-top: 4px;
 }
 
 /* 省份分组标题 */
