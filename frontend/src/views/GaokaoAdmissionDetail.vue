@@ -47,38 +47,42 @@
 
       <!-- 录取数据 -->
       <div class="data-card">
-        <div v-for="g in data.groups" :key="g.groupName" class="group-section">
-          <div class="group-header" @click="toggleGroup(g.groupName)">
-            <span :class="['group-toggle', { open: !collapsedGroups.has(g.groupName) }]">▾</span>
-            <span class="group-name">{{ g.groupName }}</span>
-            <span class="group-meta">{{ g.majors.length }} 个专业</span>
-          </div>
-          <div v-if="!collapsedGroups.has(g.groupName)" class="group-body">
-            <table class="data-table" v-if="g.majors.length > 0">
-              <thead>
-                <tr>
-                  <th class="col-major">专业</th>
-                  <th class="col-num">计划</th>
-                  <th class="col-num">最高分</th>
-                  <th class="col-num">最低分</th>
-                  <th class="col-num">平均分</th>
-                  <th class="col-num" v-if="g.majors.some(m => m.minRank)">最低排位</th>
-                </tr>
-              </thead>
-              <tbody>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="col-major">专业</th>
+              <th class="col-num">计划</th>
+              <th class="col-num">最高分</th>
+              <th class="col-num">最低分</th>
+              <th class="col-num">平均分</th>
+              <th class="col-num col-rank">最低排位</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="g in data.groups" :key="g.groupName">
+              <!-- 专业组标题行 -->
+              <tr class="group-header-row" @click="toggleGroup(g.groupName)">
+                <td colspan="6">
+                  <span :class="['group-toggle', { open: !collapsedGroups.has(g.groupName) }]">▾</span>
+                  {{ g.groupName }}
+                  <span class="group-meta">{{ g.majors.length }} 个专业</span>
+                </td>
+              </tr>
+              <!-- 专业数据行 -->
+              <template v-if="!collapsedGroups.has(g.groupName)">
                 <tr v-for="m in g.majors" :key="m.majorName">
                   <td class="col-major">{{ m.majorName }}</td>
                   <td class="col-num">{{ m.enrollmentCount || '-' }}</td>
                   <td class="col-num">{{ m.maxScore || '-' }}</td>
                   <td class="col-num">{{ m.minScore || '-' }}</td>
                   <td class="col-num">{{ m.avgScore || '-' }}</td>
-                  <td class="col-num" v-if="g.majors.some(mm => mm.minRank)">{{ m.minRank || '-' }}</td>
+                  <td class="col-num col-rank">{{ m.minRank || '-' }}</td>
                 </tr>
-              </tbody>
-            </table>
-            <div v-else class="empty-inline">暂无专业数据</div>
-          </div>
-        </div>
+              </template>
+            </template>
+          </tbody>
+        </table>
+        <div v-if="data.groups.length === 0" class="empty-inline">暂无录取数据</div>
       </div>
     </template>
   </div>
@@ -230,31 +234,26 @@ watch(
   overflow: hidden;
 }
 
-/* 专业组 */
-.group-section {
-  border-bottom: 1px solid var(--border-color, #f0f0f0);
-}
-.group-section:last-child {
-  border-bottom: none;
-}
-.group-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
+/* 专业组标题行（在表格内） */
+.group-header-row td {
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-primary, #333);
+  background: var(--body-bg, #f5f5f5);
   cursor: pointer;
   user-select: none;
-  background: var(--body-bg, #f9f9f9);
-  transition: background 0.15s;
+  border-bottom: 1px solid var(--border-color, #eee);
 }
-.group-header:hover {
-  background: var(--body-bg, #f0f0f0);
+.group-header-row:hover td {
+  background: var(--border-color, #e8e8e8);
 }
 .group-toggle {
   font-size: 12px;
   color: var(--text-secondary, #999);
   transition: transform 0.2s;
-  line-height: 1;
+  display: inline-block;
+  margin-right: 6px;
 }
 .group-toggle.open {
   transform: rotate(0deg);
@@ -262,15 +261,11 @@ watch(
 .group-toggle:not(.open) {
   transform: rotate(-90deg);
 }
-.group-name {
-  flex: 1;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary, #333);
-}
 .group-meta {
   font-size: 12px;
   color: var(--text-secondary, #999);
+  margin-left: 8px;
+  font-weight: 400;
 }
 
 /* 表格 */
@@ -298,8 +293,8 @@ watch(
 .data-table tbody tr:hover {
   background: var(--body-bg, #f0f0f0);
 }
-.data-table tbody tr:nth-child(even) {
-  background: var(--body-bg, #f0f0f0);
+.data-table tbody tr:not(.group-header-row):nth-child(even) {
+  background: var(--body-bg, #f5f5f5);
 }
 .data-table tbody tr:last-child td {
   border-bottom: none;
@@ -312,9 +307,12 @@ watch(
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+.col-rank {
+  width: 80px;
+}
 
 .empty-inline {
-  padding: 12px 16px;
+  padding: 24px 16px;
   color: var(--text-secondary, #999);
   font-size: 13px;
   text-align: center;
