@@ -22,9 +22,17 @@
       <!-- 元信息 -->
       <div class="page-meta">
         <span class="meta-chip">📍 {{ data.university.province }}{{ data.university.city ? ' · ' + data.university.city : '' }}</span>
-        <span class="meta-chip">📅 {{ data.year }}年</span>
         <span class="meta-chip">📚 {{ data.admissionProvince }} · {{ data.subjectType }}</span>
         <span v-for="tag in data.university.tags" :key="tag" class="meta-chip tag-chip">{{ tag }}</span>
+      </div>
+
+      <!-- 年份切换 -->
+      <div class="year-bar">
+        <button
+          v-for="y in data.years" :key="y"
+          :class="['year-btn', { active: activeYear === y }]"
+          @click="switchYear(y)"
+        >{{ y }}年</button>
       </div>
 
       <!-- 统计摘要 -->
@@ -77,7 +85,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { api } from '@/api'
 import { GraduationCap } from 'lucide-vue-next'
@@ -87,6 +95,7 @@ const loading = ref(true)
 const error = ref(null)
 const data = ref(null)
 const collapsedGroups = ref(new Set())
+const activeYear = ref(null)
 
 const totalMajors = computed(() => {
   if (!data.value) return 0
@@ -99,25 +108,43 @@ function toggleGroup(name) {
   collapsedGroups.value = s
 }
 
-onMounted(async () => {
+async function loadData(code, year) {
+  if (!code) {
+    error.value = '大学代码无效'
+    loading.value = false
+    return
+  }
+  loading.value = true
+  error.value = null
+  data.value = null
   try {
-    const code = route.params.code
-    if (!code) {
-      error.value = '大学代码无效'
-      return
-    }
-    const result = await api.getGaokaoAdmission(code)
+    const result = await api.getGaokaoAdmission(code, year)
     if (!result) {
       error.value = '未找到该大学数据'
       return
     }
     data.value = result
+    activeYear.value = result.activeYear
   } catch (e) {
     error.value = '加载数据失败: ' + e.message
   } finally {
     loading.value = false
   }
-})
+}
+
+async function switchYear(year) {
+  activeYear.value = year
+  await loadData(route.params.code, year)
+}
+
+// 监听路由参数变化，切换大学时重新加载
+watch(
+  () => route.params.code,
+  (code) => {
+    if (code) loadData(code)
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>
@@ -144,6 +171,34 @@ onMounted(async () => {
 }
 
 /* 统计摘要 — 复用志愿表样式 */
+/* 年份切换栏 */
+.year-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.year-btn {
+  padding: 4px 16px;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 20px;
+  background: var(--card-bg, #fff);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+  color: var(--text-secondary, #666);
+}
+.year-btn:hover {
+  border-color: var(--accent-color, #1e6bb8);
+  color: var(--accent-color, #1e6bb8);
+}
+.year-btn.active {
+  background: var(--accent-color, #1e6bb8);
+  color: #fff;
+  border-color: var(--accent-color, #1e6bb8);
+  font-weight: 600;
+}
+
 .summary-bar {
   display: flex;
   gap: 16px;

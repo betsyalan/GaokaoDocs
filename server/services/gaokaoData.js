@@ -65,11 +65,13 @@ export function getUniversities() {
 }
 
 /**
- * 获取指定大学的录取数据，按专业组分组
+ * 获取指定大学的录取数据，按年份和专业组分组
  * @param {string} universityCode - 大学代码
- * 返回: { university: { name, code, province, city, tags }, groups: [{ groupName, majors: [...] }] }
+ * @param {number} [year] - 可选，指定年份，默认最新年份
+ * 返回: { university: {...}, years: [2025,2024,...], activeYear: 2025,
+ *        groups: [{ groupName, majors: [...] }] }
  */
-export function getAdmissionByCode(universityCode) {
+export function getAdmissionByCode(universityCode, year) {
   const db = getDb()
 
   // 获取大学基本信息
@@ -82,15 +84,26 @@ export function getAdmissionByCode(universityCode) {
 
   if (!uniInfo) return null
 
-  // 获取录取数据
+  // 获取该大学所有可用年份
+  const availableYears = db.prepare(`
+    SELECT DISTINCT year FROM university_admission_data
+    WHERE university_code = ? ORDER BY year DESC
+  `).all(universityCode).map(r => r.year)
+
+  if (availableYears.length === 0) return null
+
+  // 默认取最新年份
+  const activeYear = year || availableYears[0]
+
+  // 获取指定年份的录取数据
   const rows = db.prepare(`
     SELECT year, province, subject_type, admission_type,
            subject_group_name, major_name, enrollment_count,
            max_score, min_score, avg_score, min_rank
     FROM university_admission_data
-    WHERE university_code = ?
+    WHERE university_code = ? AND year = ?
     ORDER BY subject_group_name, major_name
-  `).all(universityCode)
+  `).all(universityCode, activeYear)
 
   // 按专业组分组
   const groups = []
@@ -130,7 +143,8 @@ export function getAdmissionByCode(universityCode) {
       city: uniInfo.city || '',
       tags
     },
-    year: rows.length > 0 ? rows[0].year : null,
+    years: availableYears,
+    activeYear,
     admissionProvince: rows.length > 0 ? rows[0].province : null,
     subjectType: rows.length > 0 ? rows[0].subject_type : null,
     groups

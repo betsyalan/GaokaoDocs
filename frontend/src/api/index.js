@@ -34,7 +34,7 @@ export const api = {
 
   // 高考数据
   getGaokaoUniversities: () => request('/gaokao/universities'),
-  getGaokaoAdmission: (code) => request(`/gaokao/admission/${code}`),
+  getGaokaoAdmission: (code, year) => request(`/gaokao/admission/${code}${year ? `?year=${year}` : ''}`),
   getGaokaoDistribution: () => request('/gaokao/distribution'),
 
   // 管理（需要 token）

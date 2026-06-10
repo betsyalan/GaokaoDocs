@@ -14,9 +14,11 @@ router.get('/gaokao/universities', (req, res) => {
 })
 
 // GET /api/gaokao/admission/:code — 获取指定大学录取数据
+// 可选 query: ?year=2025 指定年份，默认最新
 router.get('/gaokao/admission/:code', (req, res) => {
   try {
-    const data = getAdmissionByCode(req.params.code)
+    const year = req.query.year ? parseInt(req.query.year) : null
+    const data = getAdmissionByCode(req.params.code, year)
     if (!data) {
       return res.status(404).json({ error: '大学未找到' })
     }
