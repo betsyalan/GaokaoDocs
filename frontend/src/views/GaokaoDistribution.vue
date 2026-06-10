@@ -141,7 +141,7 @@ onMounted(async () => {
   width: 120px;
 }
 .col-num {
-  text-align: right;
+  text-align: left;
   font-variant-numeric: tabular-nums;
   width: 120px;
 }

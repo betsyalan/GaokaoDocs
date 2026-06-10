@@ -19,9 +19,12 @@
         {{ data.university.name }}
       </h1>
 
-      <!-- 免责声明 -->
+      <!-- 免责声明 + 数据来源 -->
       <div class="disclaimer">
-        ⚠️ 所有录取数据由程序自动抓取自各高校招生官网，仅供参考。填报志愿前请务必以官方最新公布的招生章程为准。
+        <div class="disclaimer-text">⚠️ 所有录取数据由程序自动抓取自各高校招生官网，仅供参考。填报志愿前请务必以官方最新公布的招生章程为准。</div>
+        <div class="disclaimer-source" v-if="data.sourceUrl">
+          数据来源：<a :href="data.sourceUrl" target="_blank" rel="noopener">{{ data.sourceUrl }}</a>
+        </div>
       </div>
 
       <!-- 元信息 -->
@@ -87,10 +90,6 @@
         <div v-if="data.groups.length === 0" class="empty-inline">暂无录取数据</div>
       </div>
 
-      <!-- 数据来源 -->
-      <div class="source-footer" v-if="data.sourceUrl">
-        数据来源：<a :href="data.sourceUrl" target="_blank" rel="noopener">{{ data.sourceUrl }}</a>
-      </div>
     </template>
   </div>
 </template>
@@ -210,7 +209,7 @@ watch(
   font-weight: 600;
 }
 
-/* 免责声明 */
+/* 免责声明（含数据来源） */
 .disclaimer {
   padding: 10px 16px;
   margin-bottom: 16px;
@@ -221,16 +220,15 @@ watch(
   color: var(--text-secondary, #666);
   line-height: 1.6;
 }
-
-/* 数据来源 */
-.source-footer {
-  margin-top: 16px;
-  padding: 8px 0;
+.disclaimer-text { margin-bottom: 2px; }
+.disclaimer-source {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid color-mix(in srgb, var(--accent-color, #1e6bb8) 12%, transparent);
   font-size: 12px;
   color: var(--text-secondary, #999);
-  text-align: center;
 }
-.source-footer a {
+.disclaimer-source a {
   color: var(--accent-color, #1e6bb8);
   word-break: break-all;
 }
@@ -274,9 +272,7 @@ watch(
   border-bottom: none;
 }
 .group-card + .group-card {
-  margin-top: 12px;
-  padding-top: 4px;
-  border-top: 1px solid var(--border-color, #eee);
+  margin-top: 16px;
 }
 
 /* 专业组标题 */
@@ -284,9 +280,12 @@ watch(
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 16px;
+  padding: 10px 16px;
   cursor: pointer;
   user-select: none;
+  background: color-mix(in srgb, var(--accent-color, #1e6bb8) 4%, var(--card-bg, #fff));
+  border-bottom: 1px solid color-mix(in srgb, var(--accent-color, #1e6bb8) 12%, transparent);
+  border-radius: 8px 8px 0 0;
 }
 .group-toggle {
   font-size: 12px;
@@ -350,7 +349,7 @@ watch(
   width: 36%;
 }
 .col-num {
-  text-align: right;
+  text-align: left;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   width: 12%;
