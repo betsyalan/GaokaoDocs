@@ -115,8 +115,16 @@ export async function buildIndex() {
       const content = [u.province, u.city, extra].filter(Boolean).join(' ')
       insert.run(`gaokao:uni:${u.university_code}`, u.university_name, segmentChinese(content))
       count++
+      // 各专业独立条目（不带大学名，避免干扰大学名搜索）
+      const majorRows = gDb.prepare(`
+        SELECT DISTINCT major_name FROM university_admission_data
+        WHERE university_code = ? AND major_name IS NOT NULL AND major_name != ''
+      `).all(u.university_code)
+      for (const mr of majorRows) {
+        insert.run(`gaokao:maj:${u.university_code}:${mr.major_name}`, mr.major_name, '')
+        count++
+      }
     }
-
 
     gDb.close()
   } catch (err) {
@@ -127,26 +135,36 @@ export async function buildIndex() {
 }
 
 /**
- * 搜索
+ * 搜索（支持翻页）
  * @param {string} query
- * @returns {Array<{file, title, snippet}>}
+ * @param {number} [page=1]
+ * @param {number} [limit=20]
+ * @returns {{ results: Array<{file, title, snippet}>, total: number, page: number, limit: number }}
  */
-export function search(query) {
+export function search(query, page = 1, limit = 20) {
   if (!db) initSearch()
 
-  // 对查询也做中文分词，使字词能匹配上已分词的索引
   const segmentedQuery = segmentChinese(query)
 
   try {
+    // 先查总数
+    const countStmt = db.prepare(`
+      SELECT COUNT(*) as total FROM docs_index WHERE docs_index MATCH ?
+    `)
+    const { total } = countStmt.get(segmentedQuery)
+
+    // 再查分页数据
+    const offset = (page - 1) * limit
     const stmt = db.prepare(`
       SELECT file, title, snippet(docs_index, 2, '<b>', '</b>', '...', 64) as snippet
       FROM docs_index WHERE docs_index MATCH ?
       ORDER BY bm25(docs_index, 0, 3.0, 1.0)
-      LIMIT 20
+      LIMIT ? OFFSET ?
     `)
-    return stmt.all(segmentedQuery)
+    const results = stmt.all(segmentedQuery, limit, offset)
+
+    return { results, total, page, limit }
   } catch {
-    // SQL 语法错误（非法查询）时返回空
-    return []
+    return { results: [], total: 0, page, limit }
   }
 }

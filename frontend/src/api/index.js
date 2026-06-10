@@ -18,7 +18,7 @@ export const api = {
   getFile: (filePath) => request(`/file/${filePath}`),
 
   // 搜索
-  search: (q) => request(`/search?q=${encodeURIComponent(q)}`),
+  search: (q, page) => request(`/search?q=${encodeURIComponent(q)}&page=${page || 1}`),
 
   // 标签
   getTags: () => request('/tags'),
