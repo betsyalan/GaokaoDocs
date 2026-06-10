@@ -258,18 +258,15 @@ watch(
 
 /* 数据卡片 */
 .data-card {
-  background: var(--card-bg, #fff);
-  border-radius: 8px;
-  box-shadow: var(--card-shadow, 0 1px 3px rgba(0,0,0,0.1));
-  overflow: hidden;
+  /* 仅作为各组卡片的外容器，无独立阴影 */
 }
 
-/* 专业组卡片（独立表格，间距分开） */
+/* 专业组卡片（独立卡片，带阴影和圆角） */
 .group-card {
-  border-bottom: 1px solid var(--border-color, #f0f0f0);
-}
-.group-card:last-child {
-  border-bottom: none;
+  background: var(--card-bg, #fff);
+  border-radius: 10px;
+  box-shadow: var(--card-shadow, 0 1px 3px rgba(0,0,0,0.06));
+  overflow: hidden;
 }
 .group-card + .group-card {
   margin-top: 16px;
