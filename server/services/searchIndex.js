@@ -117,18 +117,6 @@ export async function buildIndex() {
       count++
     }
 
-    // 专业名称（去重，附带大学名）
-    const majors = gDb.prepare(`
-      SELECT DISTINCT a.university_code, a.major_name, u.university_name
-      FROM university_admission_data a
-      LEFT JOIN universities_info u ON a.university_code = u.university_code
-      WHERE a.major_name IS NOT NULL AND a.major_name != ''
-    `).all()
-    for (const m of majors) {
-      const content = m.university_name || ''
-      insert.run(`gaokao:maj:${m.university_code}:${m.major_name}`, m.major_name, segmentChinese(content))
-      count++
-    }
 
     gDb.close()
   } catch (err) {
