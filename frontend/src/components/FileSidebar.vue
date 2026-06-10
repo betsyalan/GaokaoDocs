@@ -3,7 +3,7 @@
     <!-- 头部：徽标 + 关闭 -->
     <div class="sidebar-header">
       <router-link to="/" class="sidebar-logo" @click="$emit('close')">
-  <component :is="BookOpen" :size="18" stroke-width="1.5" style="vertical-align:middle;margin-right:6px" /> Doc CMS
+  <component :is="BookOpen" :size="18" stroke-width="1.5" style="vertical-align:middle;margin-right:6px" /> 高考智囊
 </router-link>
       <button class="sidebar-close" @click="$emit('close')" title="收起侧栏">✕</button>
     </div>

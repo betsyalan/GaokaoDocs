@@ -8,7 +8,7 @@
         </svg>
       </button>
       <router-link to="/" class="navbar-brand">
-  <component :is="BookOpen" :size="18" stroke-width="1.5" style="vertical-align:middle;margin-right:6px" /> Doc CMS
+  <component :is="BookOpen" :size="18" stroke-width="1.5" style="vertical-align:middle;margin-right:6px" /> 高考智囊
 </router-link>
     </div>
     <div class="navbar-links">
