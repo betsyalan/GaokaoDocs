@@ -1,13 +1,16 @@
 # GaokaoDocs 📚
 
-高考志愿文档管理系统——基于 Vue3 + Express + SQLite FTS5 的 B/S 架构文档内容管理平台。支持 HTML/MD/PDF 在线预览、中文全文搜索、标签分类、访问统计和文件管理。
+高考志愿文档管理系统——基于 Vue3 + Express + SQLite FTS5 的 B/S 架构文档内容管理平台。支持 HTML/MD/PDF 在线预览、中文全文搜索、**高考录取数据查询**、标签分类、访问统计和文件管理。
 
 ## 功能特性
 
 - **多格式支持** — HTML 沙箱隔离渲染、Markdown 代码高亮渲染、PDF 逐页 Canvas 预览
-- **中文全文搜索** — 基于 SQLite FTS5，支持中文分词搜索
+- **高考录取数据** — 收录各高校历年录取分数线，按省份-大学分级浏览，支持年份切换
+- **一分一段表** — 省级高考分数段分布数据查询
+- **中文全文搜索** — 基于 SQLite FTS5，支持中文分词搜索，覆盖文档和大学/专业名称
+- **三套主题** — 琉璃蓝/琥珀橙/紫烟，CSS 变量驱动一键切换
 - **标签管理** — 自定义标签分类，按标签筛选文件
-- **访问统计** — 实时统计热门文件 Top10 和 30 日访问趋势
+- **访问统计** — 实时统计热门文件 Top10 和近 30 天访问折线图
 - **管理面板** — Web 界面文件上传/删除/重命名，JWT 认证保护
 - **响应式布局** — 可折叠侧栏，桌面/移动端自适应
 
@@ -15,9 +18,9 @@
 
 | 层 | 技术 |
 |---|------|
-| 前端 | Vue 3 + Vite + Vue Router + marked + highlight.js + PDF.js |
+| 前端 | Vue 3 + Vite + Vue Router + marked + highlight.js + PDF.js + Lucide Icons |
 | 后端 | Express + multer + jsonwebtoken + CORS |
-| 搜索 | SQLite FTS5（Node.js 22 内置 `node:sqlite`） |
+| 数据 | SQLite FTS5 全文搜索 + `gaokao_scores.db` 录取分数据库 |
 | 部署 | PM2 进程守护，端口 80 |
 
 ## 快速开始
@@ -88,24 +91,58 @@ GaokaoDocs/
 │   │   ├── search.js            # 全文搜索
 │   │   ├── tags.js              # 标签管理
 │   │   ├── stats.js             # 访问统计
-│   │   └── admin.js             # 管理操作
+│   │   ├── admin.js             # 管理操作
+│   │   ├── volunteer.js         # 志愿表数据
+│   │   └── gaokao.js            # 高考录取数据 API
 │   ├── services/
-│   │   ├── fileReader.js        # 文件读取
-│   │   └── searchIndex.js       # FTS5 索引
+│   │   ├── fileReader.js        # 文件读取与分类
+│   │   ├── searchIndex.js       # FTS5 全文索引
+│   │   ├── volunteerData.js     # 志愿表数据服务
+│   │   └── gaokaoData.js        # 高考录取数据查询
 │   └── middleware/
-│       └── stats.js             # 统计中间件
+│       └── stats.js             # 访问统计中间件
 ├── frontend/                    # 前端应用
 │   ├── src/
 │   │   ├── views/               # 页面组件
+│   │   │   ├── Home.vue             # 首页（文档分类概览）
+│   │   │   ├── DocumentView.vue     # 文档阅读
+│   │   │   ├── Search.vue           # 全文搜索
+│   │   │   ├── Stats.vue            # 访问统计
+│   │   │   ├── AdminDashboard.vue   # 管理面板
+│   │   │   ├── VolunteerPreview.vue # 志愿表预览
+│   │   │   ├── GaokaoDistribution.vue    # 一分一段表
+│   │   │   └── GaokaoAdmissionDetail.vue # 大学录取详情
 │   │   ├── components/          # 通用组件
 │   │   ├── api/                 # API 封装
 │   │   ├── router/              # 路由配置
-│   │   └── styles/              # 全局样式
+│   │   ├── composables/         # 组合式函数（主题切换等）
+│   │   └── styles/              # 全局样式 + 三套主题变量
 │   └── index.html
+├── data/                        # 高考数据库（gitignored）
+│   └── gaokao_scores.db         # SQLite 录取分数数据库
 ├── docs/                        # 文档内容源（自动扫描）
+│   ├── metadata/                # 文件元数据/统计
+│   └── search.db                # FTS5 搜索索引（自动生成）
 ├── ecosystem.config.cjs         # PM2 配置
 └── start.sh                     # 启动脚本
 ```
+
+## 高考录取数据
+
+系统内置了广东省 2022-2025 年物理类高考录取数据，涵盖 19 所高校的录取分数线。
+
+### 数据分类
+
+所有数据通过侧栏分类和首页分类 Tab 访问，与文档文件并列展示：
+
+| 分类 | 内容 |
+|------|------|
+| **历年录取分** | 各高校历年录取分数线，按所在地省份分组，支持按年份切换查看 |
+| **一分一段表** | 广东省 2025 物理类分数段分布统计 |
+
+### 数据来源
+
+录取数据自动抓取自各高校招生官网。每条数据标注了来源 URL，页面顶部有免责声明提示仅供参考。
 
 ## API 接口
 
@@ -115,10 +152,17 @@ GaokaoDocs/
 | GET | `/api/files?type=md` | 获取文件列表（可选按类型过滤） |
 | GET | `/api/file/*` | 获取文件内容 |
 
+### 高考数据
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/gaokao/universities` | 大学列表（按省份分组，含标签信息） |
+| GET | `/api/gaokao/admission/:code?year=2025` | 指定大学录取数据（可选年份） |
+| GET | `/api/gaokao/distribution` | 一分一段表数据 |
+
 ### 搜索
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/api/search?q=关键词` | 全文搜索 |
+| GET | `/api/search?q=关键词&page=1&limit=20` | 全文搜索（支持翻页，覆盖文档和大学/专业名） |
 | POST | `/api/search/reindex` | 重建索引 |
 
 ### 标签
@@ -139,7 +183,20 @@ GaokaoDocs/
 ### 统计
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/api/stats` | 总览统计 |
+| GET | `/api/stats` | 总览统计（含热门Top10和近30天趋势） |
+
+### 志愿表
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/volunteer` | 获取志愿表数据 |
+
+## 主题系统
+
+三套 CSS 变量驱动的浅色主题，通过导航栏下拉菜单一键切换：
+
+- **琉璃蓝 · 现代简约** — 清爽蓝色系
+- **琥珀橙 · 温暖现代** — 温暖橙色系
+- **紫烟 · 优雅现代** — 淡紫色系
 
 ## 安全说明
 
