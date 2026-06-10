@@ -2,7 +2,9 @@
   <aside class="file-sidebar" :class="{ open: open }">
     <!-- 头部：徽标 + 关闭 -->
     <div class="sidebar-header">
-      <router-link to="/" class="sidebar-logo" @click="$emit('close')">📚 Doc CMS</router-link>
+      <router-link to="/" class="sidebar-logo" @click="$emit('close')">
+  <component :is="BookOpen" :size="18" stroke-width="1.5" style="vertical-align:middle;margin-right:6px" /> Doc CMS
+</router-link>
       <button class="sidebar-close" @click="$emit('close')" title="收起侧栏">✕</button>
     </div>
 
@@ -15,14 +17,14 @@
 
     <!-- 错误 -->
     <div v-else-if="error" class="sidebar-error">
-      <span>⚠️</span>
+      <component :is="AlertTriangle" :size="20" stroke-width="1.5" />
       <span>{{ error }}</span>
       <button class="retry-btn" @click="loadFiles">重试</button>
     </div>
 
     <!-- 空状态：无文件且无数据时显示 -->
     <div v-else-if="files.length === 0 && universitiesByProvince.length === 0" class="sidebar-empty">
-      <span class="empty-icon">📂</span>
+      <component :is="FolderOpen" :size="32" stroke-width="1.5" style="color:var(--sidebar-text-secondary,rgba(255,255,255,0.35));margin-bottom:8px" />
       <p>暂无文件</p>
     </div>
 
@@ -104,7 +106,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { api } from '@/api'
-import { BookOpen, GraduationCap, Target, BarChart3, FileText, Globe, FilePen, Code2, BookMarked, Table, File, ScrollText, BarChart4 } from 'lucide-vue-next'
+import { BookOpen, GraduationCap, Target, BarChart3, FileText, Globe, FilePen, Code2, BookMarked, Table, File, ScrollText, BarChart4, AlertTriangle, FolderOpen } from 'lucide-vue-next'
 defineProps({
   open: { type: Boolean, default: false }
 })

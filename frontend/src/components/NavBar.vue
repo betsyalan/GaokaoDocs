@@ -7,7 +7,9 @@
           <path d="M3 5H17M3 10H17M3 15H17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
       </button>
-      <router-link to="/" class="navbar-brand">📚 Doc CMS</router-link>
+      <router-link to="/" class="navbar-brand">
+  <component :is="BookOpen" :size="18" stroke-width="1.5" style="vertical-align:middle;margin-right:6px" /> Doc CMS
+</router-link>
     </div>
     <div class="navbar-links">
       <router-link to="/" class="nav-link">首页</router-link>
@@ -24,6 +26,7 @@
 </template>
 
 <script setup>
+import { BookOpen } from 'lucide-vue-next'
 import { useTheme } from '@/composables/useTheme'
 
 defineEmits(['toggle-sidebar'])

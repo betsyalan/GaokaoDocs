@@ -10,7 +10,7 @@
 
     <!-- 空状态 -->
     <div v-else-if="files.length === 0" class="empty-state">
-      <div class="icon">📂</div>
+      <component :is="FolderOpen" :size="48" stroke-width="1.5" style="color:var(--text-secondary,#ccc);margin-bottom:12px" />
       <p>暂无文件</p>
     </div>
 
@@ -97,7 +97,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { api } from '@/api'
 import FileCard from '@/components/FileCard.vue'
-import { BookOpen, GraduationCap, Target, BarChart3, FileText, Globe, ScrollText, BarChart4 } from 'lucide-vue-next'
+import { BookOpen, GraduationCap, Target, BarChart3, FileText, Globe, ScrollText, BarChart4, FolderOpen } from 'lucide-vue-next'
 
 const files = ref([])
 const loading = ref(true)

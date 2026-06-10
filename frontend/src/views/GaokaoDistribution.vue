@@ -15,7 +15,7 @@
       <!-- 元信息 -->
       <div class="page-meta" v-if="meta">
         <span class="meta-chip"><component :is="MapPin" :size="14" stroke-width="1.5" style="vertical-align:middle;margin-right:4px" /> {{ meta.province }}</span>
-        <span class="meta-chip">📅 {{ meta.year }}</span>
+        <span class="meta-chip"><component :is="Calendar" :size="14" stroke-width="1.5" style="vertical-align:middle;margin-right:4px" /> {{ meta.year }}</span>
         <span class="meta-chip"><component :is="BookOpen" :size="14" stroke-width="1.5" style="vertical-align:middle;margin-right:4px" /> {{ meta.subjectType }}</span>
       </div>
 
@@ -43,7 +43,7 @@
 
       <!-- 空状态 -->
       <div v-else class="empty-state">
-        <div class="icon">📊</div>
+        <component :is="BarChart4" :size="48" stroke-width="1.5" style="color:var(--text-secondary,#ccc);margin-bottom:12px" />
         <p>暂无数据</p>
       </div>
 
@@ -58,7 +58,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { api } from '@/api'
-import { BarChart4, MapPin, BookOpen } from 'lucide-vue-next'
+import { BarChart4, MapPin, BookOpen, Calendar } from 'lucide-vue-next'
 
 const loading = ref(true)
 const error = ref(null)

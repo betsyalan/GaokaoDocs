@@ -1,0 +1,40 @@
+<h2>📊 数据库集成 — 整体布局方案</h2>
+<p class="subtitle">现有系统：顶部导航 + 左侧文件列表(可伸缩) + 主内容区。数据库浏览如何融入？</p>
+
+<div class="options">
+  <div class="option" data-choice="tab" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>导航 Tab 切换模式</h3>
+      <p>NavBar 新增「数据」Tab，点击后左侧变为数据表选择器，右侧为数据浏览</p>
+      <div class="pros-cons" style="margin-top:8px;font-size:13px;">
+        <div class="pros"><ul><li>与文档浏览完全隔离，互不干扰</li><li>导航路径清晰</li></ul></div>
+        <div class="cons"><ul><li>额外切换步骤</li></ul></div>
+      </div>
+    </div>
+  </div>
+  <div class="option" data-choice="sidebar" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>侧栏分类融入</h3>
+      <p>文件侧栏新增「高考数据」分类，展开后显示各数据表，点击即加载数据视图</p>
+      <div class="pros-cons" style="margin-top:8px;font-size:13px;">
+        <div class="pros"><ul><li>无缝融入现有文件浏览流程</li><li>操作路径短</li></ul></div>
+        <div class="cons"><ul><li>数据与文档混在一起，视觉上不够区分</li></ul></div>
+      </div>
+    </div>
+  </div>
+  <div class="option" data-choice="hybrid" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>混合方案（推荐）</h3>
+      <p>NavBar 新增「数据」按钮，点击后侧栏变为数据表列表 + 筛选面板，主区显示数据表格。保留文件侧栏的独立身份</p>
+      <div class="pros-cons" style="margin-top:8px;font-size:13px;">
+        <div class="pros"><ul><li>视觉上清晰区分文档与数据</li><li>侧栏可承载筛选控件</li><li>符合用户说的"上部Tab,左侧列表"</li></ul></div>
+        <div class="cons"><ul><li>需要实现两套侧栏逻辑</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p style="margin-top:24px;color:var(--text-secondary);font-size:14px;">👆 点击选择一个方案，然后在聊天里告诉我你的想法。或者直接文字回复也可以。</p>

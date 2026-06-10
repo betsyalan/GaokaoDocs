@@ -21,7 +21,7 @@
 
       <!-- 免责声明 + 数据来源 -->
       <div class="disclaimer">
-        <div class="disclaimer-text">⚠️ 所有录取数据由程序自动抓取自各高校招生官网，仅供参考。填报志愿前请务必以官方最新公布的招生章程为准。</div>
+        <div class="disclaimer-text"><component :is="AlertTriangle" :size="16" stroke-width="1.5" style="vertical-align:middle;margin-right:4px;flex-shrink:0" /> 所有录取数据由程序自动抓取自各高校招生官网，仅供参考。填报志愿前请务必以官方最新公布的招生章程为准。</div>
         <div class="disclaimer-source" v-if="data.sourceUrl">
           数据来源：<a :href="data.sourceUrl" target="_blank" rel="noopener">{{ data.sourceUrl }}</a>
         </div>
@@ -98,7 +98,7 @@
 import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { api } from '@/api'
-import { GraduationCap, MapPin, BookOpen } from 'lucide-vue-next'
+import { GraduationCap, MapPin, BookOpen, AlertTriangle } from 'lucide-vue-next'
 
 const route = useRoute()
 const loading = ref(true)
