@@ -9,6 +9,7 @@ import tagRoutes from './routes/tags.js'
 import statsRoutes from './routes/stats.js'
 import adminRoutes from './routes/admin.js'
 import volunteerRoutes from './routes/volunteer.js'
+import gaokaoRoutes from './routes/gaokao.js'
 import { statsMiddleware, initStats } from './middleware/stats.js'
 import { initSearch, buildIndex } from './services/searchIndex.js'
 
@@ -28,6 +29,7 @@ app.use('/api', tagRoutes)
 app.use('/api', statsRoutes)
 app.use('/api', adminRoutes)
 app.use('/api', volunteerRoutes)
+app.use('/api', gaokaoRoutes)
 
 // PDF 等大文件访问
 app.use('/docs', express.static(path.resolve('./docs')))
