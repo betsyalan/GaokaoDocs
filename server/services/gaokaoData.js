@@ -108,8 +108,27 @@ export function getAdmissionByCode(universityCode, year) {
   // 按专业组分组
   const groups = []
   const groupMap = {}
+  const coopMajors = []  // 中外合作办学专业单独收集
 
   for (const r of rows) {
+    const majorName = r.major_name || ''
+    const major = {
+      majorName,
+      enrollmentCount: r.enrollment_count,
+      maxScore: r.max_score,
+      minScore: r.min_score,
+      avgScore: r.avg_score,
+      minRank: r.min_rank
+    }
+
+    // 从中外合作专业组或专业名含「中外合作」的剥离出来
+    const inCoopGroup = r.subject_group_name && /中外合作/.test(r.subject_group_name)
+    const isCoopMajor = /中外合作/.test(majorName)
+    if (inCoopGroup || isCoopMajor) {
+      coopMajors.push(major)
+      continue
+    }
+
     const key = r.subject_group_name || '其他'
     if (!groupMap[key]) {
       groupMap[key] = {
@@ -119,13 +138,15 @@ export function getAdmissionByCode(universityCode, year) {
       }
       groups.push(groupMap[key])
     }
-    groupMap[key].majors.push({
-      majorName: r.major_name || '',
-      enrollmentCount: r.enrollment_count,
-      maxScore: r.max_score,
-      minScore: r.min_score,
-      avgScore: r.avg_score,
-      minRank: r.min_rank
+    groupMap[key].majors.push(major)
+  }
+
+  // 将中外合作办学专业汇总为一个独立组（放在最前）
+  if (coopMajors.length > 0) {
+    groups.unshift({
+      groupName: '中外合作办学',
+      admissionType: '',
+      majors: coopMajors
     })
   }
 
