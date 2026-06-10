@@ -6,15 +6,6 @@
       <button class="sidebar-close" @click="$emit('close')" title="收起侧栏">✕</button>
     </div>
 
-    <!-- 类型筛选 -->
-    <div class="sidebar-filters">
-      <button
-        v-for="t in types" :key="t.key"
-        :class="['filter-chip', { active: activeType === t.key }]"
-        @click="activeType = t.key; loadFiles()"
-      >{{ t.label }}</button>
-    </div>
-
     <!-- 加载中 -->
     <div v-if="loading" class="sidebar-loading">
       <span class="loading-dot"></span>
@@ -123,18 +114,9 @@ const route = useRoute()
 const files = ref([])
 const loading = ref(true)
 const error = ref(null)
-const activeType = ref('')
 const collapsedCats = ref(new Set())
 
 const iconMap = { html: Code2, md: FilePen, pdf: BookMarked, xlsx: Table }
-
-const types = [
-  { key: '', label: '全部' },
-  { key: 'md', label: 'MD' },
-  { key: 'html', label: 'HTML' },
-  { key: 'pdf', label: 'PDF' },
-  { key: 'xlsx', label: 'XLSX' }
-]
 
 // 历年录取分的大学列表（按省份分组）
 const universitiesByProvince = ref([])
@@ -188,7 +170,7 @@ async function loadFiles() {
   loading.value = true
   error.value = null
   try {
-    const data = await api.getFiles(activeType.value)
+    const data = await api.getFiles('')
     files.value = data.files || []
   } catch {
     error.value = '加载失败'
@@ -286,32 +268,6 @@ onMounted(() => {
 .sidebar-close:hover { color: var(--sidebar-text, #fff); }
 
 /* 筛选栏 */
-.sidebar-filters {
-  display: flex;
-  gap: 4px;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--sidebar-border, rgba(255,255,255,0.06));
-}
-.filter-chip {
-  padding: 3px 10px;
-  border: 1px solid var(--sidebar-border, rgba(255,255,255,0.12));
-  border-radius: 12px;
-  background: transparent;
-  color: var(--sidebar-text-secondary, rgba(255,255,255,0.55));
-  font-size: 11px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.filter-chip:hover {
-  color: var(--sidebar-text, #fff);
-  border-color: var(--sidebar-accent, rgba(255,255,255,0.3));
-}
-.filter-chip.active {
-  background: var(--sidebar-accent, #e94560);
-  color: #fff;
-  border-color: var(--sidebar-accent, #e94560);
-}
-
 /* 加载中动画 */
 .sidebar-loading {
   flex: 1;
