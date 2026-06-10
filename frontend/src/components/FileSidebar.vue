@@ -57,6 +57,58 @@
         </div>
       </div>
     </nav>
+
+      <!-- 高考数据分类（数据库驱动） -->
+      <nav class="sidebar-files" v-if="universitiesByProvince.length > 0">
+        <div class="sidebar-section-divider">高考数据</div>
+
+        <!-- 历年录取分 -->
+        <div class="sidebar-cat-group">
+          <div class="sidebar-cat-header" @click="toggleCat('admission')">
+            <component :is="ScrollText" :size="14" stroke-width="1.5" />
+            <span class="sidebar-cat-label">历年录取分</span>
+            <span class="sidebar-cat-count">
+              {{ universitiesByProvince.reduce((s, p) => s + p.universities.length, 0) }}
+            </span>
+            <span :class="['sidebar-cat-toggle', { open: !collapsedCats.has('admission') }]">▾</span>
+          </div>
+          <div v-if="!collapsedCats.has('admission')">
+            <!-- 按省份分组 -->
+            <div v-for="prov in universitiesByProvince" :key="prov.province" class="sidebar-cat-group">
+              <div class="sidebar-province-header" @click.stop="toggleProvince(prov.province)">
+                <span class="province-name">{{ prov.province }}</span>
+                <span class="sidebar-cat-count">{{ prov.universities.length }}</span>
+                <span :class="['sidebar-cat-toggle', { open: !collapsedProvince.has(prov.province) }]">▾</span>
+              </div>
+              <div v-if="!collapsedProvince.has(prov.province)">
+                <router-link
+                  v-for="u in prov.universities" :key="u.code"
+                  :to="`/gaokao/admission/${u.code}`"
+                  :class="['file-item', { active: activeUniCode === u.code }]"
+                  @click="onFileClick"
+                >
+                  <span class="file-icon">{{ '' }}</span>
+                  <span class="file-name" :title="u.name">{{ u.name }}</span>
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 一分一段表 -->
+        <div class="sidebar-cat-group">
+          <router-link
+            to="/gaokao/distribution"
+            :class="['file-item', { active: $route.path === '/gaokao/distribution' }]"
+            @click="onFileClick"
+          >
+            <span class="file-icon">
+              <component :is="BarChart4" :size="16" stroke-width="1.5" />
+            </span>
+            <span class="file-name">一分一段表</span>
+          </router-link>
+        </div>
+      </nav>
   </aside>
 </template>
 
@@ -64,7 +116,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { api } from '@/api'
-import { BookOpen, GraduationCap, Target, BarChart3, FileText, Globe, FilePen, Code2, BookMarked, Table, File } from 'lucide-vue-next'
+import { BookOpen, GraduationCap, Target, BarChart3, FileText, Globe, FilePen, Code2, BookMarked, Table, File, ScrollText, BarChart4 } from 'lucide-vue-next'
 defineProps({
   open: { type: Boolean, default: false }
 })
@@ -86,6 +138,14 @@ const types = [
   { key: 'pdf', label: 'PDF' },
   { key: 'xlsx', label: 'XLSX' }
 ]
+
+// 历年录取分的大学列表（按省份分组）
+const universitiesByProvince = ref([])
+const uniLoading = ref(false)
+const collapsedProvince = ref(new Set())
+
+// 当前激活的大学（高亮用）
+const activeUniCode = computed(() => route.params.code || null)
 
 // 分类定义（专业信息放第一组），使用 Lucide 图标组件
 const catOrder = [
@@ -139,7 +199,29 @@ async function loadFiles() {
   }
 }
 
-onMounted(loadFiles)
+async function loadUniversities() {
+  uniLoading.value = true
+  try {
+    const data = await api.getGaokaoUniversities()
+    universitiesByProvince.value = data.provinces || []
+  } catch {
+    // 静默失败，分类直接不展示
+    universitiesByProvince.value = []
+  } finally {
+    uniLoading.value = false
+  }
+}
+
+function toggleProvince(province) {
+  const s = new Set(collapsedProvince.value)
+  if (s.has(province)) s.delete(province); else s.add(province)
+  collapsedProvince.value = s
+}
+
+onMounted(() => {
+  loadFiles()
+  loadUniversities()
+})
 
 </script>
 
@@ -342,6 +424,38 @@ onMounted(loadFiles)
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* 数据分类隔断 */
+.sidebar-section-divider {
+  padding: 16px 16px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--sidebar-text-secondary, rgba(255,255,255,0.25));
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-top: 1px solid var(--sidebar-border, rgba(255,255,255,0.06));
+  margin-top: 4px;
+}
+
+/* 省份分组标题 */
+.sidebar-province-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 16px 4px 24px;
+  font-size: 12px;
+  color: var(--sidebar-text-secondary, rgba(255,255,255,0.35));
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s;
+}
+.sidebar-province-header:hover {
+  color: var(--sidebar-text, rgba(255,255,255,0.6));
+}
+.province-name {
+  flex: 1;
+  font-size: 11px;
 }
 
 /* 分类分组 */
