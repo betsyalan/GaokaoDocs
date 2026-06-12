@@ -49,26 +49,31 @@
           </div>
         </template>
 
-        <!-- 历年录取分 -->
-        <template v-else-if="ci.key === 'admission'">
+        <!-- 历年录取分（数据库 + admission 分类文件） -->
+        <template v-else-if="ci.key === 'admission' && combinedAdmissionByProvince.length > 0">
           <div v-if="!collapsedCats.has(ci.key)" class="cat-body">
-            <div v-for="prov in universitiesByProvince" :key="prov.province" class="province-group">
+            <div v-for="prov in combinedAdmissionByProvince" :key="prov.province" class="province-group">
               <div class="province-header" @click.stop="toggleProvince(prov.province)">
                 <span class="province-label">{{ prov.province }}</span>
                 <span class="province-count">{{ prov.universities.length }} 所</span>
                 <span :class="['cat-toggle', { open: !collapsedProvince.has(prov.province) }]">▾</span>
               </div>
               <div v-if="!collapsedProvince.has(prov.province)" class="uni-list">
+                <!-- 数据库大学条目 -->
                 <router-link
-                  v-for="u in prov.universities" :key="u.code"
-                  :to="`/gaokao/admission/${u.code}`"
+                  v-for="u in prov.universities" :key="u.code || u.path"
+                  :to="u._isFile ? `/file/${u.path}` : `/gaokao/admission/${u.code}`"
                   class="uni-card"
                 >
-                  <span class="uni-icon"><component :is="GraduationCap" :size="20" stroke-width="1.5" /></span>
-                  <span class="uni-name">{{ u.name }}</span>
-                  <span class="uni-tags">
-                    <span v-for="tag in u.tags" :key="tag" class="tag-badge">{{ tag }}</span>
+                  <span class="uni-icon">
+                    <component :is="u._isFile ? Image : GraduationCap" :size="20" stroke-width="1.5" />
                   </span>
+                  <span class="uni-name">{{ u.name }}</span>
+                  <template v-if="!u._isFile">
+                    <span class="uni-tags">
+                      <span v-for="tag in u.tags" :key="tag" class="tag-badge">{{ tag }}</span>
+                    </span>
+                  </template>
                   <span class="uni-arrow">→</span>
                 </router-link>
               </div>
@@ -97,7 +102,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { api } from '@/api'
 import FileCard from '@/components/FileCard.vue'
-import { BookOpen, GraduationCap, Target, BarChart3, Globe, ScrollText, BarChart4, FolderOpen } from 'lucide-vue-next'
+import { BookOpen, GraduationCap, Target, BarChart3, Globe, ScrollText, BarChart4, FolderOpen, Image } from 'lucide-vue-next'
 
 const files = ref([])
 const loading = ref(true)
@@ -125,6 +130,28 @@ const catOrder = [categoryDefs.major, categoryDefs.admission, categoryDefs.unive
 const universitiesByProvince = ref([])
 const collapsedProvince = ref(new Set())
 
+// 合并数据库大学 + admission 分类文件，按省份分组
+const combinedAdmissionByProvince = computed(() => {
+  const merged = JSON.parse(JSON.stringify(universitiesByProvince.value))
+  const admissionFiles = files.value.filter(f => f.category === 'admission' && f.province)
+  for (const file of admissionFiles) {
+    const dot = file.name.lastIndexOf('.')
+    const displayName = dot > 0 ? file.name.slice(0, dot) : file.name
+    let provGroup = merged.find(p => p.province === file.province)
+    if (!provGroup) {
+      provGroup = { province: file.province, universities: [] }
+      merged.push(provGroup)
+    }
+    provGroup.universities.push({
+      _isFile: true,
+      name: displayName,
+      path: file.path,
+      ext: file.ext
+    })
+  }
+  return merged
+})
+
 function toggleProvince(province) {
   const s = new Set(collapsedProvince.value)
   if (s.has(province)) s.delete(province); else s.add(province)
@@ -148,7 +175,7 @@ const catCounts = computed(() => {
   for (const [cat, list] of Object.entries(groupedFiles.value)) {
     counts[cat] = list.length
   }
-  counts.admission = universitiesByProvince.value.reduce((s, p) => s + p.universities.length, 0)
+  counts.admission = combinedAdmissionByProvince.value.reduce((s, p) => s + p.universities.length, 0)
   counts.distribution = 1  // 一条入口
   return counts
 })

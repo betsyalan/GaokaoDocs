@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div :class="['container', { 'container-full': isProxy }]">
     <!-- 加载中 -->
     <div v-if="loading" class="loading">加载中...</div>
 
@@ -8,8 +8,9 @@
 
     <!-- 文档内容 -->
     <template v-else-if="doc">
-      <div class="doc-header">
-        <h1>{{ doc.meta.name }}</h1>
+      <!-- 代理页面不显示标题栏（外部页面自带导航） -->
+      <div v-if="!isProxy" class="doc-header">
+        <h1>{{ displayTitle }}</h1>
         <div class="doc-meta">
           {{ doc.meta.ext.toUpperCase() }} · {{ formatSize(doc.meta.size) }} · {{ formatDate(doc.meta.mtime) }}
         </div>
@@ -23,22 +24,41 @@
 
       <!-- PDF 渲染 -->
       <PdfViewer v-else-if="doc.meta.ext === 'pdf'" :url="`/docs/${doc.meta.name}`" />
+
+      <!-- 图片渲染 -->
+      <ImageViewer v-else-if="['png','jpg','jpeg','gif','webp','svg'].includes(doc.meta.ext)" :filePath="doc.meta.name" :meta="doc.meta" />
+
+      <!-- 外部代理页面 -->
+      <ExternalPageViewer v-else-if="doc.meta.ext === 'proxy'" :url="doc.content" />
     </template>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { api } from '@/api'
 import IframeViewer from '@/components/IframeViewer.vue'
 import MdRenderer from '@/components/MdRenderer.vue'
 import PdfViewer from '@/components/PdfViewer.vue'
+import ImageViewer from '@/components/ImageViewer.vue'
+import ExternalPageViewer from '@/components/ExternalPageViewer.vue'
 
 const route = useRoute()
 const doc = ref(null)
 const loading = ref(true)
 const error = ref(null)
+
+// 是否为代理外部页面
+const isProxy = computed(() => doc.value?.meta?.ext === 'proxy')
+
+// 标题：去掉文件扩展名
+const displayTitle = computed(() => {
+  if (!doc.value) return ''
+  const name = doc.value.meta.name
+  const dot = name.lastIndexOf('.')
+  return dot > 0 ? name.slice(0, dot) : name
+})
 
 function formatSize(bytes) {
   if (bytes < 1024) return `${bytes}B`
@@ -89,4 +109,12 @@ watch(
 }
 .doc-header h1 { font-size: 22px; margin-bottom: 8px; }
 .doc-meta { font-size: 13px; color: var(--text-secondary, #999); }
+
+/* 代理页面：铺满右侧全宽，不带内边距 */
+.container-full {
+  max-width: none !important;
+  width: 100%;
+  padding: 0 !important;
+  margin: 0 !important;
+}
 </style>

@@ -13,11 +13,11 @@
 
 <script setup>
 import { computed } from 'vue'
-import { FilePen, Code2, BookMarked, Table, File } from 'lucide-vue-next'
+import { FilePen, Code2, BookMarked, Table, Image, File } from 'lucide-vue-next'
 
 const props = defineProps({ file: Object })
 
-const iconMap = { html: Code2, md: FilePen, pdf: BookMarked, xlsx: Table }
+const iconMap = { html: Code2, md: FilePen, pdf: BookMarked, xlsx: Table, png: Image, jpg: Image, jpeg: Image, gif: Image, webp: Image, svg: Image }
 
 // 分类显示配置
 const catConfig = {

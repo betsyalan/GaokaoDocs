@@ -30,7 +30,8 @@ import { ref } from 'vue'
 import NavBar from '@/components/NavBar.vue'
 import FileSidebar from '@/components/FileSidebar.vue'
 
-const sidebarOpen = ref(false)
+// 桌面端默认展开侧栏，移动端默认收起
+const sidebarOpen = ref(window.innerWidth > 768)
 </script>
 
 <style scoped>

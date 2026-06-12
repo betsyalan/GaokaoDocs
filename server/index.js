@@ -10,6 +10,7 @@ import statsRoutes from './routes/stats.js'
 import adminRoutes from './routes/admin.js'
 import volunteerRoutes from './routes/volunteer.js'
 import gaokaoRoutes from './routes/gaokao.js'
+import proxyRoutes from './routes/proxy.js'
 import { statsMiddleware, initStats } from './middleware/stats.js'
 import { initSearch, buildIndex } from './services/searchIndex.js'
 
@@ -30,6 +31,7 @@ app.use('/api', statsRoutes)
 app.use('/api', adminRoutes)
 app.use('/api', volunteerRoutes)
 app.use('/api', gaokaoRoutes)
+app.use('/api', proxyRoutes)
 
 // PDF 等大文件访问
 app.use('/docs', express.static(path.resolve('./docs')))

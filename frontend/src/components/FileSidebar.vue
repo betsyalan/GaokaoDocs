@@ -52,18 +52,18 @@
           </div>
         </template>
 
-        <!-- 历年录取分（数据库驱动） -->
-        <template v-else-if="ci.key === 'admission' && universitiesByProvince.length > 0">
+        <!-- 历年录取分（数据库驱动 + admission 分类文件） -->
+        <template v-else-if="ci.key === 'admission' && combinedAdmissionByProvince.length > 0">
           <div class="sidebar-cat-header" @click="toggleCat('admission')">
             <component :is="ci.icon" :size="14" stroke-width="1.5" />
             <span class="sidebar-cat-label">{{ ci.label }}</span>
             <span class="sidebar-cat-count">
-              {{ universitiesByProvince.reduce((s, p) => s + p.universities.length, 0) }}
+              {{ combinedAdmissionByProvince.reduce((s, p) => s + p.universities.length, 0) }}
             </span>
             <span :class="['sidebar-cat-toggle', { open: !collapsedCats.has('admission') }]">▾</span>
           </div>
           <div v-if="!collapsedCats.has('admission')">
-            <div v-for="prov in universitiesByProvince" :key="prov.province" class="sidebar-cat-group">
+            <div v-for="prov in combinedAdmissionByProvince" :key="prov.province" class="sidebar-cat-group">
               <div class="sidebar-province-header" @click.stop="toggleProvince(prov.province)">
                 <span class="province-name">{{ prov.province }}</span>
                 <span class="sidebar-cat-count">{{ prov.universities.length }}</span>
@@ -71,9 +71,9 @@
               </div>
               <div v-if="!collapsedProvince.has(prov.province)">
                 <router-link
-                  v-for="u in prov.universities" :key="u.code"
-                  :to="`/gaokao/admission/${u.code}`"
-                  :class="['file-item', { active: activeUniCode === u.code }]"
+                  v-for="u in prov.universities" :key="u.code || u.path"
+                  :to="u._isFile ? `/file/${u.path}` : `/gaokao/admission/${u.code}`"
+                  :class="['file-item', { active: u._isFile ? isActiveFile(u.path) : activeUniCode === u.code }]"
                   @click="onFileClick"
                 >
                   <span class="file-icon">{{ '' }}</span>
@@ -106,7 +106,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { api } from '@/api'
-import { BookOpen, GraduationCap, Target, BarChart3, Globe, FilePen, Code2, BookMarked, Table, File, ScrollText, BarChart4, AlertTriangle, FolderOpen } from 'lucide-vue-next'
+import { BookOpen, GraduationCap, Target, BarChart3, Globe, FilePen, Code2, BookMarked, Table, File, ScrollText, BarChart4, AlertTriangle, FolderOpen, Image } from 'lucide-vue-next'
 defineProps({
   open: { type: Boolean, default: false }
 })
@@ -118,7 +118,7 @@ const loading = ref(true)
 const error = ref(null)
 const collapsedCats = ref(new Set())
 
-const iconMap = { html: Code2, md: FilePen, pdf: BookMarked, xlsx: Table }
+const iconMap = { html: Code2, md: FilePen, pdf: BookMarked, xlsx: Table, png: Image, jpg: Image, jpeg: Image, gif: Image, webp: Image, svg: Image }
 
 // 历年录取分的大学列表（按省份分组）
 const universitiesByProvince = ref([])
@@ -126,6 +126,29 @@ const collapsedProvince = ref(new Set())
 
 // 当前激活的大学（高亮用）
 const activeUniCode = computed(() => route.params.code || null)
+
+// 合并数据库大学 + admission 分类文件，按省份分组
+const combinedAdmissionByProvince = computed(() => {
+  const merged = JSON.parse(JSON.stringify(universitiesByProvince.value))
+  const admissionFiles = files.value.filter(f => f.category === 'admission' && f.province)
+  for (const file of admissionFiles) {
+    // 去掉扩展名作为显示名
+    const dot = file.name.lastIndexOf('.')
+    const displayName = dot > 0 ? file.name.slice(0, dot) : file.name
+    let provGroup = merged.find(p => p.province === file.province)
+    if (!provGroup) {
+      provGroup = { province: file.province, universities: [] }
+      merged.push(provGroup)
+    }
+    provGroup.universities.push({
+      _isFile: true,
+      name: displayName,
+      path: file.path,
+      ext: file.ext
+    })
+  }
+  return merged
+})
 
 // 分类定义（专业信息放第一组），使用 Lucide 图标组件
 const catOrder = [
