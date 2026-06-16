@@ -5,6 +5,7 @@ import crypto from 'crypto'
 import fs from 'fs/promises'
 import path from 'path'
 import { buildIndex } from '../services/searchIndex.js'
+import { clearCache, triggerConversion } from '../services/volunteerData.js'
 
 const router = Router()
 const DOCS_DIR = path.resolve('./docs')
@@ -75,6 +76,13 @@ router.post('/admin/upload', authMiddleware, upload.single('file'), async (req, 
 
     // 重建搜索索引
     buildIndex().catch(err => console.error('Reindex after upload failed:', err))
+
+    // 如果是志愿表 Excel，立即转换 JSON
+    if (originalname.includes('志愿表') && originalname.endsWith('.xlsx')) {
+      triggerConversion().catch(err =>
+        console.error('志愿表转换失败:', err.message)
+      )
+    }
 
     res.json({ ok: true, file: originalname })
   } catch (err) {

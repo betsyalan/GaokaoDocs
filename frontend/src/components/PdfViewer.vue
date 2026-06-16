@@ -1,9 +1,12 @@
 <template>
   <div class="pdf-viewer">
     <div class="pdf-toolbar">
-      <button @click="prevPage" :disabled="currentPage <= 1">◀ 上一页</button>
-      <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
-      <button @click="nextPage" :disabled="currentPage >= totalPages">下一页 ▶</button>
+      <button @click="prevPage" :disabled="currentPage <= minPage">◀ 上一页</button>
+      <span class="page-info">
+        {{ currentPage }} / {{ totalPages }}
+        <template v-if="pageRange">（显示第 {{ pageRange.start }}-{{ pageRange.end }} 页）</template>
+      </span>
+      <button @click="nextPage" :disabled="currentPage >= maxPage">下一页 ▶</button>
     </div>
     <div class="pdf-canvas-wrap">
       <canvas ref="canvasRef"></canvas>
@@ -12,18 +15,29 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import * as pdfjs from 'pdfjs-dist'
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 
 // 使用本地打包的 worker（不依赖 CDN）
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker
 
-const props = defineProps({ url: String })
+const props = defineProps({
+  url: String,
+  /** 页码范围，如 { start: 15, end: 28 }，不传则显示全部 */
+  pageRange: { type: Object, default: null }
+})
 const canvasRef = ref(null)
 const currentPage = ref(1)
 const totalPages = ref(0)
 let pdfDoc = null
+
+// 实际可翻页的上下界
+const minPage = computed(() => props.pageRange?.start || 1)
+const maxPage = computed(() => {
+  if (!props.pageRange) return totalPages.value
+  return Math.min(props.pageRange.end, totalPages.value)
+})
 
 async function renderPage(num) {
   if (!pdfDoc || !canvasRef.value) return
@@ -42,7 +56,10 @@ onMounted(async () => {
   try {
     pdfDoc = await pdfjs.getDocument(props.url).promise
     totalPages.value = pdfDoc.numPages
-    renderPage(1)
+    // 如果指定了页码范围，跳转到起始页
+    const startPage = props.pageRange?.start || 1
+    currentPage.value = startPage
+    renderPage(startPage)
   } catch {
     console.error('PDF 加载失败')
   }
@@ -51,10 +68,10 @@ onMounted(async () => {
 watch(currentPage, (page) => renderPage(page))
 
 function prevPage() {
-  if (currentPage.value > 1) currentPage.value--
+  if (currentPage.value > minPage.value) currentPage.value--
 }
 function nextPage() {
-  if (currentPage.value < totalPages.value) currentPage.value++
+  if (currentPage.value < maxPage.value) currentPage.value++
 }
 </script>
 

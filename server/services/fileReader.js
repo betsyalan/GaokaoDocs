@@ -35,6 +35,9 @@ function classifyFile(filename, ext) {
   // Excel 文件 → 志愿数据
   if (ext === 'xlsx') return 'data'
 
+  // PDF 含"分数段"关键词 → 一分一段表
+  if (ext === 'pdf' && /分数段/.test(filename)) return 'distribution'
+
   // PDF → 报考指南
   if (ext === 'pdf') return 'guide'
 
@@ -154,13 +157,17 @@ export async function getFileContent(filePath) {
     }
   }
 
-  return {
-    content,
-    meta: {
-      name: path.basename(filePath),
-      ext,
-      size: stat.size,
-      mtime: stat.mtime
-    }
+  const meta = {
+    name: path.basename(filePath),
+    ext,
+    size: stat.size,
+    mtime: stat.mtime
   }
+
+  // 2023 年分数段 PDF 只展示第 15-28 页
+  if (ext === 'pdf' && filePath.includes('2023') && /分数段/.test(filePath)) {
+    meta.pageRange = { start: 15, end: 28 }
+  }
+
+  return { content, meta }
 }

@@ -13,6 +13,7 @@ import gaokaoRoutes from './routes/gaokao.js'
 import proxyRoutes from './routes/proxy.js'
 import { statsMiddleware, initStats } from './middleware/stats.js'
 import { initSearch, buildIndex } from './services/searchIndex.js'
+import { startWatcher } from './services/volunteerData.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -63,6 +64,9 @@ if (!process.env.ADMIN_PASSWORD) {
 initSearch()
 initStats().catch(() => {})
 buildIndex().catch(err => console.error('Build index failed:', err))
+
+// 启动志愿表文件监控，新增 xlsx 时自动转换
+startWatcher()
 
 app.listen(PORT, () => {
   console.log(`Doc CMS running at http://localhost:${PORT}`)

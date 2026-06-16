@@ -38,7 +38,7 @@
         <div class="cat-header" @click="toggleCat(ci.key)">
           <component :is="ci.icon" :size="20" stroke-width="1.5" class="cat-header-icon" />
           <span class="cat-header-label">{{ ci.label }}</span>
-          <span class="cat-header-count">{{ ci.isData ? '' : catCounts[ci.key] + ' 个文件' }}</span>
+          <span class="cat-header-count">{{ ci.isData && ci.key !== 'distribution' ? '' : catCounts[ci.key] + ' 个文件' }}</span>
           <span :class="['cat-toggle', { open: !collapsedCats.has(ci.key) }]">▾</span>
         </div>
 
@@ -81,9 +81,10 @@
           </div>
         </template>
 
-        <!-- 一分一段表 -->
+        <!-- 一分一段表（数据库 + 文件） -->
         <template v-else-if="ci.key === 'distribution'">
           <div v-if="!collapsedCats.has(ci.key)" class="cat-body">
+            <!-- 数据库入口 -->
             <router-link to="/gaokao/distribution" class="dist-card">
               <span class="dist-icon"><component :is="BarChart4" :size="28" stroke-width="1.5" /></span>
               <div class="dist-info">
@@ -91,6 +92,8 @@
                 <div class="dist-meta">597 条记录 · 点击查看 →</div>
               </div>
             </router-link>
+            <!-- 分类下的 PDF 文件 -->
+            <FileCard v-for="f in groupedFiles['distribution']" :key="f.path" :file="f" />
           </div>
         </template>
       </div>
@@ -176,7 +179,7 @@ const catCounts = computed(() => {
     counts[cat] = list.length
   }
   counts.admission = combinedAdmissionByProvince.value.reduce((s, p) => s + p.universities.length, 0)
-  counts.distribution = 1  // 一条入口
+  counts.distribution = 1 + (groupedFiles.value['distribution']?.length || 0)
   return counts
 })
 

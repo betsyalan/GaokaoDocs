@@ -1,5 +1,5 @@
 <template>
-  <div :class="['container', { 'container-full': isProxy }]">
+  <div :class="['container', { 'container-full': isFullWidth, 'container-pdf': doc?.meta?.ext === 'pdf' }]">
     <!-- 加载中 -->
     <div v-if="loading" class="loading">加载中...</div>
 
@@ -23,7 +23,7 @@
       <MdRenderer v-else-if="doc.meta.ext === 'md'" :content="doc.content" />
 
       <!-- PDF 渲染 -->
-      <PdfViewer v-else-if="doc.meta.ext === 'pdf'" :url="`/docs/${doc.meta.name}`" />
+      <PdfViewer v-else-if="doc.meta.ext === 'pdf'" :url="`/docs/${doc.meta.name}`" :pageRange="doc.meta.pageRange" />
 
       <!-- 图片渲染 -->
       <ImageViewer v-else-if="['png','jpg','jpeg','gif','webp','svg'].includes(doc.meta.ext)" :filePath="doc.meta.name" :meta="doc.meta" />
@@ -51,6 +51,13 @@ const error = ref(null)
 
 // 是否为代理外部页面
 const isProxy = computed(() => doc.value?.meta?.ext === 'proxy')
+
+// 是否全宽展示（代理页面 / PDF）
+const isFullWidth = computed(() => {
+  if (!doc.value) return false
+  const ext = doc.value.meta.ext
+  return ext === 'proxy' || ext === 'pdf'
+})
 
 // 标题：去掉文件扩展名
 const displayTitle = computed(() => {
@@ -110,11 +117,15 @@ watch(
 .doc-header h1 { font-size: 22px; margin-bottom: 8px; }
 .doc-meta { font-size: 13px; color: var(--text-secondary, #999); }
 
-/* 代理页面：铺满右侧全宽，不带内边距 */
+/* 全宽展示：铺满右侧（代理页面无内边距） */
 .container-full {
   max-width: none !important;
   width: 100%;
   padding: 0 !important;
   margin: 0 !important;
+}
+/* PDF 全宽时保留适当内边距 */
+.container-pdf {
+  padding: 24px 16px !important;
 }
 </style>

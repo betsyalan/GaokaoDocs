@@ -84,18 +84,37 @@
           </div>
         </template>
 
-        <!-- 一分一段表（数据库驱动） -->
-        <template v-else-if="ci.key === 'distribution'">
-          <router-link
-            to="/gaokao/distribution"
-            :class="['file-item', { active: $route.path === '/gaokao/distribution' }]"
-            @click="onFileClick"
-          >
-            <span class="file-icon">
-              <component :is="ci.icon" :size="16" stroke-width="1.5" />
-            </span>
-            <span class="file-name">{{ ci.label }}</span>
-          </router-link>
+        <!-- 一分一段表（数据库 + 文件） -->
+        <template v-else-if="ci.key === 'distribution' && distributionTotal > 0">
+          <div class="sidebar-cat-header" @click="toggleCat('distribution')">
+            <component :is="ci.icon" :size="14" stroke-width="1.5" />
+            <span class="sidebar-cat-label">{{ ci.label }}</span>
+            <span class="sidebar-cat-count">{{ distributionTotal }}</span>
+            <span :class="['sidebar-cat-toggle', { open: !collapsedCats.has('distribution') }]">▾</span>
+          </div>
+          <div v-if="!collapsedCats.has('distribution')">
+            <!-- 数据库入口 -->
+            <router-link
+              to="/gaokao/distribution"
+              :class="['file-item', { active: $route.path === '/gaokao/distribution' }]"
+              @click="onFileClick"
+            >
+              <span class="file-icon">
+                <component :is="ci.icon" :size="16" stroke-width="1.5" />
+              </span>
+              <span class="file-name" title="广东省 2025 物理类一分一段表（597 条记录）">广东省 2025 物理类一分一段表</span>
+            </router-link>
+            <!-- 分类下的 PDF 文件 -->
+            <router-link
+              v-for="f in groupedFiles['distribution']" :key="f.path"
+              :to="`/file/${f.path}`"
+              :class="['file-item', { active: isActiveFile(f.path) }]"
+              @click="onFileClick"
+            >
+              <span class="file-icon"><component :is="iconMap[f.ext] || File" :size="16" stroke-width="1.5" /></span>
+              <span class="file-name" :title="f.name">{{ f.name }}</span>
+            </router-link>
+          </div>
         </template>
       </div>
     </nav>
@@ -126,6 +145,11 @@ const collapsedProvince = ref(new Set())
 
 // 当前激活的大学（高亮用）
 const activeUniCode = computed(() => route.params.code || null)
+
+// 一分一段表分类总数（DB 入口 1 + 文件数）
+const distributionTotal = computed(() => {
+  return 1 + (groupedFiles.value['distribution']?.length || 0)
+})
 
 // 合并数据库大学 + admission 分类文件，按省份分组
 const combinedAdmissionByProvince = computed(() => {
