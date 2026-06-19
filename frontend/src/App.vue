@@ -40,7 +40,6 @@ const sidebarOpen = ref(window.innerWidth > 768)
   flex-direction: column;
   height: 100vh;
   height: 100dvh;               /* iOS Safari 地址栏收起时正确撑满 */
-  padding-top: var(--sat, 0px); /* Safe Area 顶部（适配 iPhone 刘海/灵动岛） */
 }
 .app-body {
   display: flex;

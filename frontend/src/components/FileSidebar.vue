@@ -264,8 +264,7 @@ onMounted(() => {
   transform: translateX(-100%);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s;
   box-shadow: 2px 0 12px rgba(0,0,0,0.08);
-  padding-top: var(--sat, 0px);               /* Safe Area 顶部 */
-  padding-bottom: var(--sab, 0px);             /* Safe Area 底部 */
+  padding-bottom: var(--sab, 0px);             /* Safe Area 底部（Home Indicator 区域） */
   will-change: transform;                      /* GPU 加速侧栏滑动动画 */
 }
 
