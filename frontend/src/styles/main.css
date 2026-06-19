@@ -98,3 +98,73 @@ body.theme-ziyan {
   --text-secondary: #8a7a9a;
   --border-color: #ddd4e6;
 }
+
+/* ========== iPhone Safe Area 适配 ========== */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
+/* iPhone 触摸优化 */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* hover 效果仅用于支持 hover 的设备（触摸设备不会触发粘滞 hover） */
+@media (hover: hover) {
+  a:hover { text-decoration: underline; }
+}
+/* 非 hover 设备（触摸屏）的点击反馈通过 active 实现 */
+@media (hover: none) {
+  a:active { opacity: 0.7; }
+}
+
+/* 修复 iOS 上的 hover 粘滞问题 */
+@media (hover: none) and (pointer: coarse) {
+  .file-item:hover,
+  .nav-link:hover,
+  .menu-btn:hover,
+  .sidebar-close:hover,
+  .retry-btn:hover,
+  .sidebar-cat-header:hover,
+  .sidebar-province-header:hover,
+  .sidebar-pull:hover {
+    background: transparent !important;
+    color: inherit !important;
+  }
+}
+
+/* 防止 iOS Safari 自动缩放小于 16px 的字号 */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ========== iPhone 响应式断点 ========== */
+/* 小屏手机 (< 376px) — iPhone SE */
+@media (max-width: 375px) {
+  .container { padding: 16px 12px; }
+  .page-title { font-size: 20px; margin-bottom: 16px; }
+}
+
+/* 手机 (376-480px) — 主流 iPhone */
+@media (max-width: 480px) {
+  .container { padding: 20px 14px; }
+  .page-title { font-size: 22px; }
+}
+
+/* ========== iOS 表单控件重置 ========== */
+select,
+input,
+button,
+textarea {
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0;
+}
+
+/* 但保留按钮和 select 的视觉效果，单独恢复 border-radius */
+button, select {
+  border-radius: 4px;
+}
