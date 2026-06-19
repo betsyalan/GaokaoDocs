@@ -5,8 +5,8 @@
 
     <!-- 主体区域：侧栏 + 内容 -->
     <div class="app-body">
-      <!-- 侧栏遮罩（移动端点击关闭） -->
-      <div v-if="sidebarOpen" class="sidebar-overlay" @click="sidebarOpen = false"></div>
+      <!-- 侧栏遮罩（移动端点击关闭，使用 class 控制显隐实现 opacity 过渡） -->
+      <div :class="['sidebar-overlay', { visible: sidebarOpen }]" @click="sidebarOpen = false"></div>
 
       <!-- 左侧文件列表 -->
       <FileSidebar :open="sidebarOpen" @close="sidebarOpen = false" />
@@ -39,6 +39,8 @@ const sidebarOpen = ref(window.innerWidth > 768)
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;               /* iOS Safari 地址栏收起时正确撑满 */
+  padding-top: var(--sat, 0px); /* Safe Area 顶部（适配 iPhone 刘海/灵动岛） */
 }
 .app-body {
   display: flex;
@@ -47,16 +49,19 @@ const sidebarOpen = ref(window.innerWidth > 768)
   position: relative;
 }
 
-/* 侧栏遮罩（窄屏用） */
+/* 侧栏遮罩（窄屏用）— 使用 opacity 过渡替代 display 切换，带动画 */
 .sidebar-overlay {
-  display: none;
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.4);
   z-index: 99;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
-@media (max-width: 768px) {
-  .sidebar-overlay { display: block; }
+.sidebar-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .main-content {
