@@ -15,16 +15,14 @@
 
     <!-- 图片（始终在 DOM 中，以保证 @load/@error 能正常触发） -->
     <div class="iv-image-area" :class="{ 'iv-hidden': loading || error }">
-      <div class="iv-image-wrap">
-        <a :href="imageUrl" target="_blank" rel="noopener" class="iv-image-link">
-          <img
-            :src="imageUrl"
-            :alt="fileName"
-            class="iv-image"
-            @load="onLoad"
-            @error="onImgError"
-          />
-        </a>
+      <div class="iv-image-wrap" @click="openLightbox">
+        <img
+          :src="imageUrl"
+          :alt="fileName"
+          class="iv-image"
+          @load="onLoad"
+          @error="onImgError"
+        />
       </div>
       <!-- 图片元信息 -->
       <div class="iv-meta">
@@ -37,14 +35,22 @@
              · {{ formatDate(meta.mtime) }}
           </template>
         </template>
-        <span class="iv-tip">（点击图片在新标签中查看原图）</span>
+        <span class="iv-tip">（点击图片放大查看）</span>
       </div>
     </div>
+
+    <!-- 灯箱：全屏放大查看 -->
+    <Teleport to="body">
+      <div v-if="lightboxOpen" class="iv-lightbox" @click.self="closeLightbox">
+        <button class="iv-lightbox-close" @click="closeLightbox" title="关闭">✕</button>
+        <img :src="imageUrl" :alt="fileName" class="iv-lightbox-image" @click.self="closeLightbox" />
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
   /** 文件名，如 "东北大学.png" */
@@ -56,6 +62,7 @@ const props = defineProps({
 const loading = ref(true)
 const error = ref(null)
 const naturalSize = ref(null)
+const lightboxOpen = ref(false)
 
 // 图片静态路由
 const imageUrl = computed(() => `/docs/${props.filePath}`)
@@ -73,6 +80,26 @@ function onImgError() {
   loading.value = false
   error.value = '图片加载失败'
 }
+
+/** 打开灯箱全屏查看 */
+function openLightbox() {
+  lightboxOpen.value = true
+}
+
+/** 关闭灯箱 */
+function closeLightbox() {
+  lightboxOpen.value = false
+}
+
+/** ESC 键关闭灯箱 */
+function onKeydown(e) {
+  if (e.key === 'Escape' && lightboxOpen.value) {
+    closeLightbox()
+  }
+}
+
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
 function formatSize(bytes) {
   if (!bytes && bytes !== 0) return ''
@@ -141,14 +168,10 @@ function formatDate(d) {
   display: flex;
   justify-content: center;
   max-width: 100%;
-}
-.iv-image-link {
-  display: inline-flex;
-  cursor: zoom-in;
-  transition: box-shadow 0.2s;
+  cursor: pointer;
   border-radius: 8px;
 }
-.iv-image-link:hover {
+.iv-image-wrap:hover {
   box-shadow: 0 4px 20px rgba(0,0,0,0.12);
 }
 .iv-image {
@@ -170,5 +193,57 @@ function formatDate(d) {
 .iv-tip {
   opacity: 0.6;
   margin-left: 8px;
+}
+
+/* ========== 灯箱：全屏放大查看 ========== */
+.iv-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  cursor: zoom-out;
+  animation: iv-fadein 0.2s ease;
+}
+@keyframes iv-fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.iv-lightbox-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+  cursor: default;
+  animation: iv-scalein 0.25s ease;
+}
+@keyframes iv-scalein {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.iv-lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  z-index: 10;
+}
+.iv-lightbox-close:hover {
+  background: rgba(255,255,255,0.3);
 }
 </style>
