@@ -536,4 +536,83 @@ const filteredGroups = computed(() => {
   .search-box input { width: 100px; }
   .group-compact-stats { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ========== 窄屏（≤480px）志愿表紧凑布局 ========== */
+@media (max-width: 480px) {
+  /* 志愿表容器缩紧 */
+  .volunteer-container { padding: 10px 8px; }
+
+  /* 标题缩小 */
+  .vol-header h1 { font-size: 20px; }
+
+  /* 文件选择器按钮紧凑 */
+  .file-bar { gap: 4px; }
+  .file-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 8px;
+  }
+  .file-btn-dot { font-size: 14px; }
+  .file-btn-label { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-btn-badge { font-size: 10px; padding: 0 6px; }
+
+  /* 元信息芯片缩小 */
+  .page-meta { gap: 6px; }
+  .meta-chip { font-size: 11px; padding: 3px 8px; }
+
+  /* 统计摘要紧凑 */
+  .summary-bar { gap: 6px; }
+  .summary-item {
+    padding: 4px 10px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  .summary-item .num { font-size: 14px; }
+
+  /* 筛选栏紧凑 */
+  .filter-bar { gap: 4px; }
+  .filter-bar-label { font-size: 11px; }
+  .filter-btn {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+  .search-box input {
+    width: 80px;
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+
+  /* 学校卡片头部紧凑 */
+  .school-card-header { padding: 10px 10px; gap: 8px; }
+  .school-name { font-size: 13px; }
+  .school-name .group-num { font-size: 10px; }
+  .school-tag { font-size: 10px; padding: 0 6px; }
+  .school-meta-row { font-size: 11px; gap: 8px; }
+  .school-meta-row span { white-space: normal; }  /* 允许元信息换行 */
+
+  /* 概率指示器缩小 */
+  .prob-indicator { width: 36px; height: 36px; }
+  .prob-indicator .prob-text { font-size: 10px; }
+  .prob-indicator .prob-text small { font-size: 8px; }
+
+  /* 展开箭头缩小 */
+  .expand-icon { width: 20px; height: 20px; font-size: 12px; }
+
+  /* 组级统计数据网格紧凑 */
+  .group-compact-stats {
+    padding: 6px 10px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+  .stat-item .stat-value { font-size: 13px; }
+  .stat-item .stat-label { font-size: 10px; }
+
+  /* 专业表格基础字号缩小 */
+  .major-table { font-size: 12px; min-width: 600px; }
+  .major-table th { padding: 6px 6px; font-size: 11px; }
+  .major-table td { padding: 6px 6px; }
+  .major-table .major-name-cell { min-width: 100px; }
+  .major-table .major-rating { font-size: 10px; }
+  .major-table .year-label { font-size: 9px; }
+}
 </style>
