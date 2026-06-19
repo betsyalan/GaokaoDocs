@@ -39,7 +39,6 @@ const sidebarOpen = ref(window.innerWidth > 768)
   display: flex;
   flex-direction: column;
   height: 100vh;
-  height: 100dvh;               /* iOS Safari 地址栏收起时正确撑满 */
 }
 .app-body {
   display: flex;
