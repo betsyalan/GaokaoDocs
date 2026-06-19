@@ -121,7 +121,7 @@ body.theme-ziyan {
   a:active { opacity: 0.7; }
 }
 
-/* 修复 iOS 上的 hover 粘滞问题 */
+/* 修复 iOS 上的 hover 粘滞问题：仅清除背景色变化，保留文字颜色交互相应 */
 @media (hover: none) and (pointer: coarse) {
   .file-item:hover,
   .nav-link:hover,
@@ -132,7 +132,6 @@ body.theme-ziyan {
   .sidebar-province-header:hover,
   .sidebar-pull:hover {
     background: transparent !important;
-    color: inherit !important;
   }
 }
 
@@ -142,16 +141,16 @@ html {
 }
 
 /* ========== iPhone 响应式断点 ========== */
-/* 小屏手机 (< 376px) — iPhone SE */
-@media (max-width: 375px) {
-  .container { padding: 16px 12px; }
-  .page-title { font-size: 20px; margin-bottom: 16px; }
-}
-
-/* 手机 (376-480px) — 主流 iPhone */
+/* 手机 (376-480px) — 主流 iPhone（宽断点在前，被窄断点覆盖） */
 @media (max-width: 480px) {
   .container { padding: 20px 14px; }
   .page-title { font-size: 22px; }
+}
+
+/* 小屏手机 (< 376px) — iPhone SE（窄断点在后，优先级更高） */
+@media (max-width: 375px) {
+  .container { padding: 16px 12px; }
+  .page-title { font-size: 20px; margin-bottom: 16px; }
 }
 
 /* ========== iOS 表单控件重置 ========== */
