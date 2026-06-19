@@ -216,4 +216,15 @@ function goPage(p) {
   border: 1px solid color-mix(in srgb, var(--accent-color, #1e6bb8) 20%, transparent);
   vertical-align: middle;
 }
+
+/* 窄屏（≤480px）搜索页紧凑布局 */
+@media (max-width: 480px) {
+  .search-input { padding: 10px 12px; font-size: 15px; }
+  .result-item { padding: 12px; }
+  .result-title { font-size: 14px; }
+  .result-snippet { font-size: 13px; margin-top: 6px; }
+  .result-meta { font-size: 12px; }
+  .page-btn { padding: 5px 10px; font-size: 12px; }
+  .result-type { font-size: 9px; padding: 0 5px; }
+}
 </style>

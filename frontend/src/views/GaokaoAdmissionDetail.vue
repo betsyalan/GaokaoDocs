@@ -361,4 +361,26 @@ watch(
   font-size: 13px;
   text-align: center;
 }
+
+/* 窄屏（≤480px）录取详情紧凑布局 */
+@media (max-width: 480px) {
+  .page-title { font-size: 20px; }
+  .page-title :deep(.lucide) { width: 20px; height: 20px; }
+  .page-meta { gap: 4px; }
+  .meta-chip { font-size: 11px; padding: 2px 7px; }
+  .year-bar { gap: 4px; }
+  .year-btn { padding: 4px 10px; font-size: 12px; }
+  .summary-bar { gap: 6px; }
+  .summary-item { padding: 4px 10px; gap: 4px; font-size: 11px; }
+  .summary-item .num { font-size: 14px; }
+  .group-header { padding: 8px 12px; }
+  .group-name { font-size: 13px; }
+  .group-meta { font-size: 11px; }
+  .data-table { font-size: 12px; }
+  .data-table th { padding: 5px 6px; font-size: 11px; }
+  .data-table td { padding: 5px 6px; }
+  .col-major { font-size: 12px; }
+  .col-num { font-size: 11px; }
+  .disclaimer-text { font-size: 12px; }
+}
 </style>

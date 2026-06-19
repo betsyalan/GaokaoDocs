@@ -440,4 +440,31 @@ async function loadUniversities() {
   color: var(--text-secondary, #999);
   margin-top: 4px;
 }
+
+/* 窄屏（≤480px）首页紧凑布局 */
+@media (max-width: 480px) {
+  .page-title { font-size: 20px; }
+  .cat-bar {
+    gap: 4px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+  .cat-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .cat-btn .cat-count { font-size: 10px; }
+  .cat-header { padding: 8px 0; }
+  .cat-header-label { font-size: 15px; }
+  .cat-header-count { font-size: 12px; }
+  .cat-section { margin-bottom: 20px; }
+  .dist-card { padding: 14px 16px; gap: 12px; }
+  .dist-icon :deep(svg) { width: 20px; height: 20px; }
+  .dist-title { font-size: 14px; }
+  .dist-meta { font-size: 12px; }
+}
 </style>

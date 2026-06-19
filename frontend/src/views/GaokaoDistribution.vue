@@ -153,4 +153,17 @@ onMounted(async () => {
   color: var(--text-secondary, #999);
   text-align: center;
 }
+
+/* 窄屏（≤480px）一分一段表紧凑布局 */
+@media (max-width: 480px) {
+  .page-title { font-size: 20px; }
+  .page-meta { gap: 4px; }
+  .meta-chip { font-size: 11px; padding: 2px 8px; }
+  .data-table { font-size: 12px; }
+  .data-table th { padding: 6px 8px; font-size: 11px; }
+  .data-table td { padding: 5px 8px; }
+  .col-score { width: 60px; font-size: 12px; }
+  .col-num { width: 70px; font-size: 11px; }
+  .table-footer { font-size: 11px; padding: 8px 0; }
+}
 </style>
