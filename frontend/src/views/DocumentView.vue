@@ -74,10 +74,12 @@
           <div class="xlsx-pagination">
             <button :disabled="xlsxPage <= 1" @click="goXlsxPage(1)">⏮ 首页</button>
             <button :disabled="xlsxPage <= 1" @click="goXlsxPage(xlsxPage - 1)">◀ 上一页</button>
-            <button
-              v-for="p in xlsxPageButtons" :key="p"
-              :class="['xlsx-page-btn', { active: p === xlsxPage }]"
-              @click="goXlsxPage(p)">{{ p }}</button>
+            <template v-for="(p, pi) in xlsxPageButtons" :key="pi">
+              <span v-if="p === '...'" class="xlsx-ellipsis">…</span>
+              <button v-else
+                :class="['xlsx-page-btn', { active: p === xlsxPage }]"
+                @click="goXlsxPage(p)">{{ p }}</button>
+            </template>
             <button :disabled="xlsxPage >= xlsxTotalPages" @click="goXlsxPage(xlsxPage + 1)">下一页 ▶</button>
             <button :disabled="xlsxPage >= xlsxTotalPages" @click="goXlsxPage(xlsxTotalPages)">末页 ⏭</button>
           </div>
@@ -113,6 +115,9 @@ const xlsxTotalPages = ref(0)
 const xlsxLoading = ref(false)
 const xlsxError = ref(null)
 
+// 用于丢弃过期响应的递增计数器，防止竞态条件
+let xlsxFetchGen = 0
+
 /** 生成显示的页码按钮列表（最多 7 个） */
 const xlsxPageButtons = computed(() => {
   const total = xlsxTotalPages.value
@@ -132,25 +137,29 @@ const xlsxPageButtons = computed(() => {
   return pages
 })
 
-/** 加载 xlsx 分页数据 */
+/** 加载 xlsx 分页数据（带竞态保护） */
 async function goXlsxPage(page) {
   if (!doc.value || doc.value.meta.originalExt !== 'xlsx') return
+  const gen = ++xlsxFetchGen
   xlsxLoading.value = true
   xlsxError.value = null
   try {
     const encoded = encodeURIComponent(doc.value.meta.name)
     const res = await fetch(`/api/file-xlsx-page/${encoded}?page=${page}&pageSize=${xlsxPageSize.value}`)
+    if (gen !== xlsxFetchGen) return // 已有新请求，丢弃过期响应
     if (!res.ok) throw new Error(`请求失败 (${res.status})`)
     const data = await res.json()
+    if (gen !== xlsxFetchGen) return // 再次检查（json 解析后也可能有新的请求）
     xlsxHeaders.value = data.headers || []
     xlsxRows.value = data.rows || []
     xlsxTotal.value = data.total || 0
     xlsxPage.value = data.page || 1
     xlsxTotalPages.value = data.totalPages || 0
   } catch (e) {
+    if (gen !== xlsxFetchGen) return // 过期错误也忽略
     xlsxError.value = '加载表格数据失败: ' + e.message
   } finally {
-    xlsxLoading.value = false
+    if (gen === xlsxFetchGen) xlsxLoading.value = false
   }
 }
 
@@ -205,7 +214,10 @@ async function loadFile(filePath) {
   xlsxTotal.value = 0
   xlsxPage.value = 1
   xlsxTotalPages.value = 0
+  xlsxLoading.value = false
   xlsxError.value = null
+  // 递增 fetch 生成计数器，丢弃任何正在进行的过期请求
+  xlsxFetchGen++
   try {
     const data = await api.getFile(filePath)
     doc.value = data
@@ -344,5 +356,9 @@ watch(
 }
 .xlsx-pagination .xlsx-page-btn {
   min-width: 36px; text-align: center;
+}
+.xlsx-ellipsis {
+  padding: 6px 4px; font-size: 14px; color: var(--text-body, #2c3e50);
+  letter-spacing: 2px; user-select: none; cursor: default;
 }
 </style>

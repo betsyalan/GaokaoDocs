@@ -33,7 +33,7 @@ router.get('/file-xlsx-page/*', async (req, res) => {
   try {
     const filePath = req.params[0]
     const page = parseInt(req.query.page) || 1
-    const pageSize = parseInt(req.query.pageSize) || 100
+    const pageSize = Math.min(500, Math.max(1, parseInt(req.query.pageSize) || 100))
     const data = await getXlsxPage(filePath, page, pageSize)
     res.json(data)
   } catch (err) {
