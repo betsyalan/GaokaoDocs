@@ -1,6 +1,7 @@
 import fs from 'fs/promises'
 import path from 'path'
 import { DatabaseSync } from 'node:sqlite'
+import XLSX from 'xlsx'
 
 const DOCS_DIR = path.resolve('./docs')
 const DB_PATH = path.resolve('./data/gaokao_scores.db')
@@ -136,9 +137,14 @@ export async function getFileContent(filePath) {
   const stat = await fs.stat(fullPath)
 
   let content = null
+  let renderExt = ext
+
   if (ext === 'pdf' || ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext)) {
     // PDF 和图片返回相对路径，前端直接访问 /docs/ 静态路由
     content = filePath
+  } else if (ext === 'xlsx') {
+    // Excel 文件：只返回元数据（不含内容），前端通过分页 API 逐页加载
+    renderExt = 'xlsx-html'
   } else {
     content = await fs.readFile(fullPath, 'utf-8')
 
@@ -159,9 +165,13 @@ export async function getFileContent(filePath) {
 
   const meta = {
     name: path.basename(filePath),
-    ext,
+    ext: renderExt,
     size: stat.size,
     mtime: stat.mtime
+  }
+  // xlsx-html 时保留原始 ext 供前端展示标签（显示 XLSX 而非 XLSX-HTML）
+  if (renderExt === 'xlsx-html') {
+    meta.originalExt = ext
   }
 
   // 2023 年分数段 PDF 只展示第 15-28 页
@@ -170,4 +180,54 @@ export async function getFileContent(filePath) {
   }
 
   return { content, meta }
+}
+
+/**
+ * 按页获取 xlsx 文件数据（JSON 格式，供前端分页展示）
+ * @param {string} filePath 文件名
+ * @param {number} page 页码（从 1 开始）
+ * @param {number} pageSize 每页行数
+ * @returns {{ headers: string[], rows: string[][], total: number, page: number, pageSize: number, totalPages: number }}
+ */
+export async function getXlsxPage(filePath, page = 1, pageSize = 100) {
+  const fullPath = path.resolve(DOCS_DIR, filePath)
+  if (!fullPath.startsWith(DOCS_DIR)) throw new Error('Invalid path')
+
+  const ext = path.extname(filePath).toLowerCase().replace('.', '')
+  if (ext !== 'xlsx') throw new Error('Not an xlsx file')
+
+  const workbook = XLSX.readFile(fullPath)
+  const sheetName = workbook.SheetNames[0]
+  const sheet = workbook.Sheets[sheetName]
+
+  // 用 header: 1 读取为二维数组（每行一个数组，无键名）
+  const raw = XLSX.utils.sheet_to_json(sheet, { header: 1 })
+  if (raw.length === 0) {
+    return { headers: [], rows: [], total: 0, page, pageSize, totalPages: 0 }
+  }
+
+  // 将 raw 中每行转为字符串数组，过滤空行
+  const rows2d = raw.map(row =>
+    (Array.isArray(row) ? row : [row]).map(cell => cell === null || cell === undefined ? '' : String(cell))
+  ).filter(row => row.some(c => c !== ''))
+
+  // 找到第一个有效列数 > 3 的行作为表头（跳过合并单元格等占位行）
+  let headerIdx = 0
+  for (let i = 0; i < Math.min(rows2d.length, 10); i++) {
+    const filled = rows2d[i].filter(c => c !== '').length
+    if (filled > 3) { headerIdx = i; break }
+  }
+
+  const headers = rows2d[headerIdx] || []
+  const allRowsStr = rows2d.slice(headerIdx + 1)
+
+  const total = allRowsStr.length
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
+  const safePage = Math.max(1, Math.min(page, totalPages))
+
+  const start = (safePage - 1) * pageSize
+  const end = Math.min(start + pageSize, total)
+  const rows = allRowsStr.slice(start, end)
+
+  return { headers, rows, total, page: safePage, pageSize, totalPages }
 }

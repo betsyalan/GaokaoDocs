@@ -1,5 +1,6 @@
 <template>
-  <router-link :to="file.ext === 'xlsx' ? '/volunteer' : `/file/${file.path}`" class="file-card">
+  <!-- 只有"志愿表".xlsx 跳转到志愿预览页，其他 xlsx 到文件详情页（服务端转 HTML 展示） -->
+  <router-link :to="file.ext === 'xlsx' && (file.name || '').includes('志愿表') ? '/volunteer' : `/file/${file.path}`" class="file-card">
     <span class="file-icon"><component :is="iconMap[file.ext] || File" :size="24" stroke-width="1.5" /></span>
     <div class="file-info">
       <div class="file-name">{{ file.name }}</div>

@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { getFiles, getFileContent } from '../services/fileReader.js'
+import { getFiles, getFileContent, getXlsxPage } from '../services/fileReader.js'
 
 const router = Router()
 
@@ -18,6 +18,23 @@ router.get('/file/*', async (req, res) => {
   try {
     const filePath = req.params[0]
     const data = await getFileContent(filePath)
+    res.json(data)
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      res.status(404).json({ error: 'File not found' })
+    } else {
+      res.status(500).json({ error: err.message })
+    }
+  }
+})
+
+// GET /api/file-xlsx-page/*?page=1&pageSize=100  — 分页读取 xlsx 数据
+router.get('/file-xlsx-page/*', async (req, res) => {
+  try {
+    const filePath = req.params[0]
+    const page = parseInt(req.query.page) || 1
+    const pageSize = parseInt(req.query.pageSize) || 100
+    const data = await getXlsxPage(filePath, page, pageSize)
     res.json(data)
   } catch (err) {
     if (err.code === 'ENOENT') {

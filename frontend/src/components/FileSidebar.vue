@@ -42,7 +42,7 @@
           <div v-if="!collapsedCats.has(ci.key)">
             <router-link
               v-for="f in groupedFiles[ci.key]" :key="f.path"
-              :to="f.ext === 'xlsx' ? '/volunteer' : `/file/${f.path}`"
+              :to="f.ext === 'xlsx' && (f.name || '').includes('志愿表') ? '/volunteer' : `/file/${f.path}`"
               :class="['file-item', { active: isActiveFile(f.path) }]"
               @click="onFileClick"
             >
