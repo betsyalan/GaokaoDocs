@@ -65,7 +65,7 @@
           @end="onGroupDragEnd" tag="div" class="card-list"
           :scroll="true" :scroll-sensitivity="50" :scroll-speed="15">
           <div v-for="g in displayGroups" :key="g.group_num" class="school-card">
-            <div class="drag-handle" title="拖拽排序调整专业组顺序">⠿</div>
+            <div class="drag-handle" title="拖拽以调整专业组顺序（上下拖动）">⋮⋮</div>
             <div class="school-card-header" @click="toggleExpand(g.group_num)">
             <!-- 概率圆形指示器 -->
             <div :class="['prob-indicator', probClass(g.group_probability_raw)]">
@@ -135,7 +135,7 @@
                   ghost-class="ghost-row" @end="makeOnMajorDragEnd(g.group_num)"
                   :scroll="true" :scroll-sensitivity="50" :scroll-speed="15">
                   <tr v-for="m in g.majors" :key="m.code || m.name">
-                    <td class="major-drag-cell"><span class="major-drag-handle" title="拖拽排序">⠿</span></td>
+                    <td class="major-drag-cell"><span class="major-drag-handle" title="拖拽以调整专业顺序">⋮⋮</span></td>
                     <td class="major-name-cell">
                       {{ cleanMajorName(m.name) }}
                       <span v-if="m.rating" class="major-rating">{{ m.rating }}</span>
@@ -619,20 +619,25 @@ const filterOptions = computed(() => {
 
 /* ========== 拖拽排序 ========== */
 .drag-handle {
-  cursor: grab; padding: 10px 4px 10px 12px; font-size: 16px;
-  color: var(--text-body); opacity: .2; user-select: none;
-  display: flex; align-items: center; transition: opacity .2s;
-  flex-shrink: 0; line-height: 1;
+  cursor: grab; padding: 12px 6px 12px 14px; font-size: 14px; letter-spacing: 1px;
+  color: var(--text-body); opacity: .35; user-select: none;
+  display: flex; align-items: center; transition: all .2s;
+  flex-shrink: 0; line-height: 1; border-right: 1px solid var(--border-subtle);
+  margin-right: 4px; background: transparent; border-radius: 0;
 }
-.school-card:hover .drag-handle { opacity: .6; }
+.school-card:hover .drag-handle { opacity: .7; color: var(--color-accent); }
 .drag-handle:active { cursor: grabbing; }
-.ghost { opacity: .4; background: var(--bg-stripe); }
+.ghost { opacity: .3; background: var(--bg-stripe); border: 2px dashed var(--color-accent); border-radius: 12px; }
 
-.major-drag-cell { width: 24px; padding: 4px; text-align: center; }
-.major-drag-handle { cursor: grab; font-size: 14px; opacity: .2; transition: opacity .2s; user-select: none; }
-tr:hover .major-drag-handle { opacity: .5; }
+.major-drag-cell { width: 28px; padding: 4px 2px; text-align: center; }
+.major-drag-handle {
+  cursor: grab; font-size: 12px; letter-spacing: 1px;
+  opacity: .3; transition: opacity .2s; user-select: none; color: var(--text-body);
+  display: inline-block; padding: 2px 4px; border-radius: 4px;
+}
+tr:hover .major-drag-handle { opacity: .8; color: var(--color-accent); }
 .major-drag-handle:active { cursor: grabbing; }
-.ghost-row { opacity: .3; }
+.ghost-row { opacity: .25; }
 
 /* 通用 */
 .loading, .empty-state { text-align: center; padding: 60px 20px; color: var(--text-body); opacity: .6; }
