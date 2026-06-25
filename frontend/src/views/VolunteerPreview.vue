@@ -63,7 +63,13 @@
 
         <VueDraggable v-model="displayGroups" ghost-class="ghost" handle=".drag-handle"
           @end="onGroupDragEnd" tag="div" class="card-list"
-          :scroll="true" :scroll-sensitivity="60" :scroll-speed="25">
+          :options="{
+            scroll: true,
+            scrollSensitivity: 80,
+            scrollSpeed: 30,
+            forceAutoScrollFallback: true,
+            bubbleScroll: true
+          }">
           <div v-for="g in displayGroups" :key="g.group_num" class="school-card">
             <div class="card-main-row">
               <div class="drag-handle" title="拖拽以调整专业组顺序（上下拖动）">
@@ -137,7 +143,13 @@
                 </tr></thead>
                 <VueDraggable v-model="g.majors" tag="tbody" handle=".major-drag-handle"
                   ghost-class="ghost-row" @end="makeOnMajorDragEnd(g.group_num)"
-                  :scroll="true" :scroll-sensitivity="60" :scroll-speed="25">
+                  :options="{
+                    scroll: true,
+                    scrollSensitivity: 80,
+                    scrollSpeed: 30,
+                    forceAutoScrollFallback: true,
+                    bubbleScroll: true
+                  }">
                   <tr v-for="m in g.majors" :key="m.code || m.name">
                     <td class="major-drag-cell"><span class="major-drag-handle" title="拖拽以调整专业顺序">⋮⋮</span></td>
                     <td class="major-name-cell">
