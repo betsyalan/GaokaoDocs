@@ -63,10 +63,13 @@
 
         <VueDraggable v-model="displayGroups" ghost-class="ghost" handle=".drag-handle"
           @end="onGroupDragEnd" tag="div" class="card-list"
-          :scroll="true" :scroll-sensitivity="50" :scroll-speed="15">
+          :scroll="true" :scroll-sensitivity="60" :scroll-speed="25">
           <div v-for="g in displayGroups" :key="g.group_num" class="school-card">
-            <div class="drag-handle" title="拖拽以调整专业组顺序（上下拖动）">⋮⋮</div>
-            <div class="school-card-header" @click="toggleExpand(g.group_num)">
+            <div class="card-main-row">
+              <div class="drag-handle" title="拖拽以调整专业组顺序（上下拖动）">
+                <span class="drag-dots">⋮</span><span class="drag-dots">⋮</span><span class="drag-dots">⋮</span>
+              </div>
+              <div class="school-card-header" @click="toggleExpand(g.group_num)">
             <!-- 概率圆形指示器 -->
             <div :class="['prob-indicator', probClass(g.group_probability_raw)]">
               <div class="prob-ring"></div>
@@ -94,6 +97,7 @@
             </div>
 
             <div :class="['expand-icon', { open: expandedGroups.has(g.group_num) }]">▾</div>
+          </div>
           </div>
 
           <!-- 组级历年数据 -->
@@ -133,7 +137,7 @@
                 </tr></thead>
                 <VueDraggable v-model="g.majors" tag="tbody" handle=".major-drag-handle"
                   ghost-class="ghost-row" @end="makeOnMajorDragEnd(g.group_num)"
-                  :scroll="true" :scroll-sensitivity="50" :scroll-speed="15">
+                  :scroll="true" :scroll-sensitivity="60" :scroll-speed="25">
                   <tr v-for="m in g.majors" :key="m.code || m.name">
                     <td class="major-drag-cell"><span class="major-drag-handle" title="拖拽以调整专业顺序">⋮⋮</span></td>
                     <td class="major-name-cell">
@@ -522,9 +526,12 @@ const filterOptions = computed(() => {
 .school-card {
   background: var(--card-bg); border-radius: 12px; box-shadow: var(--card-shadow);
   margin-bottom: 16px; overflow: hidden; transition: background .3s, box-shadow .3s, border-color .3s;
-  border: 1px solid transparent;
+  border: 1px solid transparent; display: flex; flex-direction: column;
 }
 .school-card:hover { border-color: var(--border-subtle); }
+
+/* 卡片主行：拖拽手柄 + 头部内容 */
+.card-main-row { display: flex; align-items: stretch; }
 
 /* 卡片头部 */
 .school-card-header {
@@ -619,15 +626,21 @@ const filterOptions = computed(() => {
 
 /* ========== 拖拽排序 ========== */
 .drag-handle {
-  cursor: grab; padding: 12px 6px 12px 14px; font-size: 14px; letter-spacing: 1px;
-  color: var(--text-body); opacity: .35; user-select: none;
-  display: flex; align-items: center; transition: all .2s;
-  flex-shrink: 0; line-height: 1; border-right: 1px solid var(--border-subtle);
-  margin-right: 4px; background: transparent; border-radius: 0;
+  cursor: grab; min-width: 36px; padding: 12px 0;
+  color: var(--text-body); opacity: .4; user-select: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: all .2s; flex-shrink: 0; line-height: 1;
+  background: transparent; border-radius: 12px 0 0 12px;
+  gap: 1px; border-right: 1px solid transparent;
 }
-.school-card:hover .drag-handle { opacity: .7; color: var(--color-accent); }
+.drag-dots { font-size: 20px; letter-spacing: 0; font-weight: 700; display: block; line-height: .7; }
+.school-card:hover .drag-handle {
+  opacity: .9; color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+  border-right-color: var(--border-subtle);
+}
 .drag-handle:active { cursor: grabbing; }
-.ghost { opacity: .3; background: var(--bg-stripe); border: 2px dashed var(--color-accent); border-radius: 12px; }
+.ghost { opacity: .5; background: var(--bg-stripe); border: 2px dashed var(--color-accent); border-radius: 12px; }
 
 .major-drag-cell { width: 28px; padding: 4px 2px; text-align: center; }
 .major-drag-handle {
