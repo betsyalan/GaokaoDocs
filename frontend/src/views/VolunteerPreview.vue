@@ -62,7 +62,8 @@
         <div v-if="displayGroups.length === 0" class="empty-state">🔍 没有匹配的院校，请调整筛选条件</div>
 
         <VueDraggable v-model="displayGroups" ghost-class="ghost" handle=".drag-handle"
-          @end="onGroupDragEnd" tag="div" class="card-list">
+          @end="onGroupDragEnd" tag="div" class="card-list"
+          :scroll="true" :scroll-sensitivity="50" :scroll-speed="15">
           <div v-for="g in displayGroups" :key="g.group_num" class="school-card">
             <div class="drag-handle" title="拖拽排序调整专业组顺序">⠿</div>
             <div class="school-card-header" @click="toggleExpand(g.group_num)">
@@ -131,7 +132,8 @@
                   </th>
                 </tr></thead>
                 <VueDraggable v-model="g.majors" tag="tbody" handle=".major-drag-handle"
-                  ghost-class="ghost-row" @end="makeOnMajorDragEnd(g.group_num)">
+                  ghost-class="ghost-row" @end="makeOnMajorDragEnd(g.group_num)"
+                  :scroll="true" :scroll-sensitivity="50" :scroll-speed="15">
                   <tr v-for="m in g.majors" :key="m.code || m.name">
                     <td class="major-drag-cell"><span class="major-drag-handle" title="拖拽排序">⠿</span></td>
                     <td class="major-name-cell">
