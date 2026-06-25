@@ -8,7 +8,10 @@
     <div v-else-if="!data" class="empty-state"><div class="icon">📂</div><p>暂无志愿表数据</p></div>
 
     <template v-else>
-      <header class="vol-header"><h1>📋 高考志愿表预览</h1></header>
+      <header class="vol-header">
+        <h1>📋 高考志愿表预览</h1>
+        <span v-if="saveIndicator" class="save-toast">{{ saveIndicator }}</span>
+      </header>
 
       <!-- 文件选择器：每个 Excel 文件独立一页 -->
       <div class="file-bar">
@@ -65,8 +68,8 @@
           @end="onGroupDragEnd" tag="div" class="card-list"
           :options="{
             scroll: true,
-            scrollSensitivity: 80,
-            scrollSpeed: 30,
+            scrollSensitivity: 150,
+            scrollSpeed: 60,
             forceAutoScrollFallback: true,
             bubbleScroll: true
           }">
@@ -145,8 +148,8 @@
                   ghost-class="ghost-row" @end="makeOnMajorDragEnd(g.group_num)"
                   :options="{
                     scroll: true,
-                    scrollSensitivity: 80,
-                    scrollSpeed: 30,
+                    scrollSensitivity: 150,
+                    scrollSpeed: 60,
                     forceAutoScrollFallback: true,
                     bubbleScroll: true
                   }">
@@ -370,6 +373,8 @@ function makeOnMajorDragEnd(groupNum) {
 }
 
 /** 保存排序到服务端 */
+const saveIndicator = ref('')
+let saveTimer = null
 async function saveOrderToServer() {
   const fileId = activeTab.value
   if (!fileId) return
@@ -379,10 +384,17 @@ async function saveOrderToServer() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fileId, groups: groupOrder.value, majors: majorOrders.value })
     })
-    if (!resp.ok) console.error('保存排序失败:', resp.status)
+    if (resp.ok) {
+      saveIndicator.value = '✅ 排序已保存'
+    } else {
+      saveIndicator.value = '❌ 保存失败'
+    }
   } catch (e) {
+    saveIndicator.value = '❌ 保存失败'
     console.error('保存排序失败:', e)
   }
+  clearTimeout(saveTimer)
+  saveTimer = setTimeout(() => { saveIndicator.value = '' }, 2000)
 }
 
 // 筛选条件变化时重新同步显示
@@ -431,8 +443,17 @@ const filterOptions = computed(() => {
   max-width: 1200px; margin: 0 auto; padding: 20px 16px;
   font-size: 15px; color: var(--text-body, #2c3e50); min-height: 60vh;
 }
-.vol-header { text-align: center; margin-bottom: 20px; }
+.vol-header { text-align: center; margin-bottom: 20px; position: relative; }
 .vol-header h1 { font-size: 24px; color: var(--color-h1, #0a2540); }
+.save-toast {
+  position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+  font-size: 13px; padding: 4px 12px; border-radius: 8px;
+  background: var(--prob-high-bg, #e8f5e9); color: var(--prob-high-color, #2e7d32);
+  animation: fadeInOut 2s ease forwards; pointer-events: none;
+}
+@keyframes fadeInOut {
+  0% { opacity: 0; } 15% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; }
+}
 
 /* ========== 三套主题 ========== */
 .volunteer-container.theme-liuli {

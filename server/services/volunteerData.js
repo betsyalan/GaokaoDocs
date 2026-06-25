@@ -135,21 +135,27 @@ export function clearCache() {
 }
 
 /**
- * 读取保存的志愿表排序顺序
+ * 读取保存的志愿表排序顺序（带内存缓存）
  * 文件不存在或解析失败时返回空对象
  */
+const orderCache = { data: null, loaded: false }
+
 export async function getSavedOrder() {
-  try {
-    const raw = await fs.readFile(ORDER_FILE, 'utf-8')
-    return JSON.parse(raw)
-  } catch {
-    return {}
+  if (!orderCache.loaded) {
+    try {
+      const raw = await fs.readFile(ORDER_FILE, 'utf-8')
+      orderCache.data = JSON.parse(raw)
+    } catch {
+      orderCache.data = {}
+    }
+    orderCache.loaded = true
   }
+  return orderCache.data
 }
 
 /**
  * 保存指定志愿表的排序顺序
- * 写入后自动清除缓存，下次读取时将合并新顺序
+ * 更新内存缓存后写入文件，避免连续拖拽时的竞态条件
  * @param {string} fileId - 志愿表标识（文件 stem）
  * @param {object} order - 排序数据
  * @param {number[]} [order.groups] - 分组编号的有序数组
@@ -173,9 +179,6 @@ export async function saveOrder(fileId, { groups, majors }) {
 
   // 写入文件（格式化为 2 空格缩进）
   await fs.writeFile(ORDER_FILE, JSON.stringify(allOrders, null, 2), 'utf-8')
-
-  // 清除缓存，下次读取时将合并新顺序
-  clearCache()
 }
 
 /**
