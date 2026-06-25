@@ -57,12 +57,15 @@
         </div>
       </div>
 
-      <!-- 卡片 -->
-      <div class="card-list" v-if="currentData">
-        <div v-if="filteredGroups.length === 0" class="empty-state">🔍 没有匹配的院校，请调整筛选条件</div>
+      <!-- 卡片（可拖拽排序） -->
+      <div v-if="currentData">
+        <div v-if="displayGroups.length === 0" class="empty-state">🔍 没有匹配的院校，请调整筛选条件</div>
 
-        <div v-for="g in filteredGroups" :key="g.group_num" class="school-card">
-          <div class="school-card-header" @click="toggleExpand(g.group_num)">
+        <VueDraggable v-model="displayGroups" ghost-class="ghost" handle=".drag-handle"
+          @end="onGroupDragEnd" tag="div" class="card-list">
+          <div v-for="g in displayGroups" :key="g.group_num" class="school-card">
+            <div class="drag-handle" title="拖拽排序调整专业组顺序">⠿</div>
+            <div class="school-card-header" @click="toggleExpand(g.group_num)">
             <!-- 概率圆形指示器 -->
             <div :class="['prob-indicator', probClass(g.group_probability_raw)]">
               <div class="prob-ring"></div>
@@ -117,6 +120,7 @@
             <div class="major-table-wrap" v-if="g.majors.length > 0">
               <table class="major-table">
                 <thead><tr>
+                  <th style="width:24px"></th>
                   <th>专业名称</th><th class="prob-cell">录取<br>概率</th><th class="num-cell">计划</th>
                   <th class="tuition-cell">学费/年</th><th>学制</th>
                   <th v-for="y in ['2025','2024','2023','2022']" :key="y" class="num-cell year-group">
@@ -126,8 +130,10 @@
                     最低位次<span class="year-label">{{ y }}</span>
                   </th>
                 </tr></thead>
-                <tbody>
+                <VueDraggable v-model="g.majors" tag="tbody" handle=".major-drag-handle"
+                  ghost-class="ghost-row" @end="makeOnMajorDragEnd(g.group_num)">
                   <tr v-for="m in g.majors" :key="m.code || m.name">
+                    <td class="major-drag-cell"><span class="major-drag-handle" title="拖拽排序">⠿</span></td>
                     <td class="major-name-cell">
                       {{ cleanMajorName(m.name) }}
                       <span v-if="m.rating" class="major-rating">{{ m.rating }}</span>
@@ -145,18 +151,20 @@
                       {{ m.years?.[y]?.['最低位次'] ? numText(m.years[y]['最低位次']) : '—' }}
                     </td>
                   </tr>
-                </tbody>
+                </VueDraggable>
               </table>
             </div>
           </div>
-        </div>
+          </div>
+        </VueDraggable>
       </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { VueDraggable } from 'vue-draggable-plus'
 import { useTheme } from '@/composables/useTheme'
 
 const { currentTheme } = useTheme()
@@ -167,6 +175,10 @@ const activeTab = ref('')
 const activeFilter = ref('all')
 const searchQuery = ref('')
 const expandedGroups = ref(new Set())
+// 拖拽排序状态
+const groupOrder = ref([])         // 专业组完整排序 [group_num, ...]
+const majorOrders = ref({})        // 各专业组内专业 code 排序 { [group_num]: [code, ...] }
+const displayGroups = ref([])      // 最终显示的列表（排序+筛选后），VueDraggable v-model
 const yearLabels = ['2025物理', '2024物理', '2023物理', '2022物理']
 
 const currentData = computed(() => data.value?.[activeTab.value] || null)
@@ -181,7 +193,17 @@ async function fetchData() {
     if (!json || Object.keys(json).length === 0) throw new Error('未找到志愿表数据')
     data.value = json
     const keys = Object.keys(json)
-    if (keys.length > 0) activeTab.value = keys[0]
+    if (keys.length > 0) {
+      activeTab.value = keys[0]
+      // 初始化排序状态（后端已按保存顺序返回）
+      groupOrder.value = json[keys[0]].groups.map(g => g.group_num)
+      const mo = {}
+      for (const g of json[keys[0]].groups) {
+        mo[g.group_num] = g.majors.map(m => m.code).filter(Boolean)
+      }
+      majorOrders.value = mo
+      syncDisplay()
+    }
   } catch (e) {
     error.value = '加载失败: ' + e.message
   } finally { loading.value = false }
@@ -258,6 +280,109 @@ function hasYearData(g) {
   return y2025 && y2025['最低分'] != null
 }
 
+// ─── 拖拽排序辅助函数 ──────────────────────────────────
+
+/** 按 groupOrder 重排 groups，新组追加末尾 */
+function orderGroups(groups, order) {
+  const map = new Map(groups.map(g => [g.group_num, g]))
+  const result = []
+  const seen = new Set()
+  for (const num of order) {
+    const g = map.get(num)
+    if (g) { result.push(g); seen.add(num) }
+  }
+  for (const g of groups) {
+    if (!seen.has(g.group_num)) { result.push(g); seen.add(g.group_num) }
+  }
+  return result
+}
+
+/** 判断专业组是否匹配当前概率筛选 */
+function matchesFilter(g, filterKey) {
+  if (filterKey === 'all') return true
+  if (filterKey === 'high') return isHighProb(probValue(g.group_probability_raw))
+  if (filterKey === 'mid') return isMidProb(probValue(g.group_probability_raw))
+  if (filterKey === 'low') return isLowProb(probValue(g.group_probability_raw))
+  if (filterKey === 'new') return g.group_probability === '新增'
+  if (filterKey === 'unknown') return !g.group_probability_raw || g.group_probability_raw === '-' || g.group_probability_raw === '-位'
+  return true
+}
+
+/** 判断专业组是否匹配搜索词 */
+function matchesSearch(g, query) {
+  if (!query) return true
+  const q = query.toLowerCase()
+  return g.school_name.toLowerCase().includes(q) ||
+    (g.level_tags || []).some(t => t.toLowerCase().includes(q)) ||
+    g.location.toLowerCase().includes(q) ||
+    g.majors.some(m => m.name.toLowerCase().includes(q))
+}
+
+/** 构建 displayGroups：按顺序 → 筛选 → 搜索 */
+function syncDisplay() {
+  if (!currentData.value) { displayGroups.value = []; return }
+  let list = orderGroups(currentData.value.groups, groupOrder.value)
+  if (activeFilter.value !== 'all') {
+    list = list.filter(g => matchesFilter(g, activeFilter.value))
+  }
+  const q = searchQuery.value.trim()
+  if (q) {
+    list = list.filter(g => matchesSearch(g, q))
+  }
+  displayGroups.value = list
+}
+
+/** 专业组拖拽结束 → 更新 groupOrder → 保存 */
+async function onGroupDragEnd() {
+  const visibleNums = displayGroups.value.map(g => g.group_num)
+  const nonVisible = groupOrder.value.filter(n => !visibleNums.includes(n))
+  groupOrder.value = [...visibleNums, ...nonVisible]
+  await saveOrderToServer()
+}
+
+/** 创建专业拖拽结束处理器（每个专业组一个） */
+function makeOnMajorDragEnd(groupNum) {
+  return async function () {
+    const g = currentData.value.groups.find(gr => gr.group_num === groupNum)
+    if (g) {
+      majorOrders.value = { ...majorOrders.value, [groupNum]: g.majors.map(m => m.code).filter(Boolean) }
+      await saveOrderToServer()
+    }
+  }
+}
+
+/** 保存排序到服务端 */
+async function saveOrderToServer() {
+  const fileId = activeTab.value
+  if (!fileId) return
+  try {
+    const resp = await fetch('/api/volunteer-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileId, groups: groupOrder.value, majors: majorOrders.value })
+    })
+    if (!resp.ok) console.error('保存排序失败:', resp.status)
+  } catch (e) {
+    console.error('保存排序失败:', e)
+  }
+}
+
+// 筛选条件变化时重新同步显示
+watch([activeFilter, searchQuery, groupOrder], () => { syncDisplay() }, { deep: true })
+
+// 文件切换时重新初始化排序
+watch(activeTab, () => {
+  if (currentData.value) {
+    groupOrder.value = currentData.value.groups.map(g => g.group_num)
+    const mo = {}
+    for (const g of currentData.value.groups) {
+      mo[g.group_num] = g.majors.map(m => m.code).filter(Boolean)
+    }
+    majorOrders.value = mo
+    syncDisplay()
+  }
+})
+
 const totalMajors = computed(() => currentData.value ? currentData.value.groups.reduce((s, g) => s + g.majors.length, 0) : 0)
 const highCount = computed(() => currentData.value ? currentData.value.groups.filter(g => isHighProb(probValue(g.group_probability_raw))).length : 0)
 const midCount = computed(() => currentData.value ? currentData.value.groups.filter(g => isMidProb(probValue(g.group_probability_raw))).length : 0)
@@ -280,40 +405,6 @@ const filterOptions = computed(() => {
     { key: 'new', label: '新增', count: n },
     { key: 'unknown', label: '待定', count: u }
   ]
-})
-
-const filteredGroups = computed(() => {
-  if (!currentData.value) return []
-  let r = currentData.value.groups
-  if (activeFilter.value !== 'all') {
-    r = r.filter(g => {
-      if (activeFilter.value === 'high') return isHighProb(probValue(g.group_probability_raw))
-      if (activeFilter.value === 'mid') return isMidProb(probValue(g.group_probability_raw))
-      if (activeFilter.value === 'low') return isLowProb(probValue(g.group_probability_raw))
-      if (activeFilter.value === 'new') return g.group_probability === '新增'
-      if (activeFilter.value === 'unknown') return !g.group_probability_raw || g.group_probability_raw === '-' || g.group_probability_raw === '-位'
-      return true
-    })
-  }
-  const q = searchQuery.value.trim().toLowerCase()
-  if (q) {
-    r = r.filter(g =>
-      g.school_name.toLowerCase().includes(q) ||
-      (g.level_tags || []).some(t => t.toLowerCase().includes(q)) ||
-      g.location.toLowerCase().includes(q) ||
-      g.majors.some(m => m.name.toLowerCase().includes(q))
-    )
-  }
-  // 按录取概率从高到低排序
-  r.sort((a, b) => {
-    const pa = probValue(a.group_probability_raw)
-    const pb = probValue(b.group_probability_raw)
-    if (pa !== null && pb !== null) return pb - pa
-    if (pa !== null) return -1
-    if (pb !== null) return 1
-    return 0
-  })
-  return r
 })
 </script>
 
@@ -523,6 +614,23 @@ const filteredGroups = computed(() => {
 .major-table .prob-cell { text-align: center; }
 .major-table .tuition-cell { text-align: right; white-space: nowrap; }
 .major-prob-tag { display: inline-block; font-size: 11px; padding: 1px 8px; border-radius: 10px; font-weight: 600; }
+
+/* ========== 拖拽排序 ========== */
+.drag-handle {
+  cursor: grab; padding: 10px 4px 10px 12px; font-size: 16px;
+  color: var(--text-body); opacity: .2; user-select: none;
+  display: flex; align-items: center; transition: opacity .2s;
+  flex-shrink: 0; line-height: 1;
+}
+.school-card:hover .drag-handle { opacity: .6; }
+.drag-handle:active { cursor: grabbing; }
+.ghost { opacity: .4; background: var(--bg-stripe); }
+
+.major-drag-cell { width: 24px; padding: 4px; text-align: center; }
+.major-drag-handle { cursor: grab; font-size: 14px; opacity: .2; transition: opacity .2s; user-select: none; }
+tr:hover .major-drag-handle { opacity: .5; }
+.major-drag-handle:active { cursor: grabbing; }
+.ghost-row { opacity: .3; }
 
 /* 通用 */
 .loading, .empty-state { text-align: center; padding: 60px 20px; color: var(--text-body); opacity: .6; }
