@@ -65,14 +65,8 @@
         <div v-if="displayGroups.length === 0" class="empty-state">🔍 没有匹配的院校，请调整筛选条件</div>
 
         <VueDraggable v-model="displayGroups" ghost-class="ghost" handle=".drag-handle"
-          @end="onGroupDragEnd" tag="div" class="card-list"
-          :options="{
-            scroll: true,
-            scrollSensitivity: 150,
-            scrollSpeed: 60,
-            forceAutoScrollFallback: true,
-            bubbleScroll: true
-          }">
+          :options="sortableOptions" @end="onGroupDragEnd"
+          tag="div" class="card-list">
           <div v-for="g in displayGroups" :key="g.group_num" class="school-card">
             <div class="card-main-row">
               <div class="drag-handle" title="拖拽以调整专业组顺序（上下拖动）">
@@ -145,14 +139,7 @@
                   </th>
                 </tr></thead>
                 <VueDraggable v-model="g.majors" tag="tbody" handle=".major-drag-handle"
-                  ghost-class="ghost-row" @end="makeOnMajorDragEnd(g.group_num)"
-                  :options="{
-                    scroll: true,
-                    scrollSensitivity: 150,
-                    scrollSpeed: 60,
-                    forceAutoScrollFallback: true,
-                    bubbleScroll: true
-                  }">
+                  ghost-class="ghost-row" :options="sortableOptions" @end="makeOnMajorDragEnd(g.group_num)()">
                   <tr v-for="m in g.majors" :key="m.code || m.name">
                     <td class="major-drag-cell"><span class="major-drag-handle" title="拖拽以调整专业顺序">⋮⋮</span></td>
                     <td class="major-name-cell">
@@ -353,8 +340,56 @@ function syncDisplay() {
   displayGroups.value = list
 }
 
-/** 专业组拖拽结束 → 更新 groupOrder → 保存 */
+/** 拖拽自动滚动：用 SortableJS onMove 回调获取光标位置驱动滚动 */
+let scrollRAFId = null
+let dragClientY = -1
+
+/** 停止拖拽滚动 */
+function stopDragScroll() {
+  if (scrollRAFId) { cancelAnimationFrame(scrollRAFId); scrollRAFId = null }
+  dragClientY = -1
+}
+
+/** 自动滚动循环：光标在上部 45% 区域即向上滚动，越靠近边缘越快 */
+function autoScroll() {
+  if (dragClientY < 0) {
+    scrollRAFId = requestAnimationFrame(autoScroll)
+    return
+  }
+  const vh = window.innerHeight
+  const y = dragClientY
+
+  // 上部 45% → 向上滚动
+  if (y < vh * 0.45) {
+    const factor = 1 - y / (vh * 0.45)                 // 0→1（中间→顶部）
+    window.scrollBy(0, -(10 + factor * 50))             // 10~60px/帧 向上
+  }
+  // 下部 45% → 向下滚动
+  else if (y > vh * 0.55) {
+    const factor = (y - vh * 0.55) / (vh * 0.45)       // 0→1（中间→底部）
+    window.scrollBy(0, 10 + factor * 50)                // 10~60px/帧 向下
+  }
+
+  scrollRAFId = requestAnimationFrame(autoScroll)
+}
+
+/** 创建 SortableJS onMove 回调：放在 options 中传入 */
+function createOnMove() {
+  return function (evt) {
+    dragClientY = evt.clientY
+    if (!scrollRAFId) {
+      scrollRAFId = requestAnimationFrame(autoScroll)
+    }
+  }
+}
+
+const sortableOptions = {
+  onMove: createOnMove()
+}
+
+/** 专业组拖拽结束 → 停止滚动 → 更新 groupOrder → 保存 */
 async function onGroupDragEnd() {
+  stopDragScroll()
   const visibleNums = displayGroups.value.map(g => g.group_num)
   const nonVisible = groupOrder.value.filter(n => !visibleNums.includes(n))
   groupOrder.value = [...visibleNums, ...nonVisible]
@@ -364,6 +399,7 @@ async function onGroupDragEnd() {
 /** 创建专业拖拽结束处理器（每个专业组一个） */
 function makeOnMajorDragEnd(groupNum) {
   return async function () {
+    stopDragScroll()
     const g = currentData.value.groups.find(gr => gr.group_num === groupNum)
     if (g) {
       majorOrders.value = { ...majorOrders.value, [groupNum]: g.majors.map(m => m.code).filter(Boolean) }
